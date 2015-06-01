@@ -11,7 +11,7 @@ class JHSWorkerM(ProcessMgr):
     '''A class of JHSWorker process manager'''
     def __init__(self, _process_num=10):
         # worker instance
-        self.worker = Worker()
+        self.worker = JHSWorker()
 
         # parent construct
         ProcessMgr.__init__(self, _process_num, self.worker)

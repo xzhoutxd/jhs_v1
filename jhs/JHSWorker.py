@@ -100,7 +100,7 @@ class JHSWorker():
             elif _obj == 'act':
                 self.run_act(msg)
             elif _obj == 'item':
-                self.run_item(msg)
+                self.run_item(msg, _val)
             else:
                 print '# crawlPage unknown obj = %s' % _obj
         except Common.InvalidPageException as e:
@@ -294,7 +294,7 @@ class JHSWorker():
     def process(self, _obj, _crawl_type, _val=None):
         self.init_crawl(_obj, _crawl_type)
 
-        i, M = 0, 1
+        i, M = 0, 5
         n = 0
         while True: 
             if _crawl_type and _crawl_type != '':
@@ -321,22 +321,12 @@ class JHSWorker():
     # 查找结束的活动
     def scanEndActs(self, val):
         _acts = self.mysqlAccess.selectJhsActEnd(val)
-        #end_acts = []
-        #for _act in _acts:
-        #    act_id = _act[1]
-        #    end_acts.append({"act_id":str(act_id)})
-        ## 删除已经结束的活动
-        #self.delAct(end_acts)
-        return _acts
-
-    # 查找没有结束的活动
-    def scanNotEndActs(self, val):
-        _acts = self.mysqlAccess.selectJhsActNotEnd(val)
-        return _acts
-
-    # 查找没有开团的活动
-    def scanNotStartActs(self, val):
-        _acts = self.mysqlAccess.selectJhsActNotStart(val)
+        end_acts = []
+        for _act in _acts:
+            act_id = _act[1]
+            end_acts.append({"act_id":str(act_id)})
+        # 删除已经结束的活动
+        self.delAct(end_acts)
         return _acts
 
 if __name__ == '__main__':

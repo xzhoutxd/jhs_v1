@@ -16,7 +16,6 @@ from Queue import Empty
 from db.MysqlAccess import MysqlAccess
 from JHSItem import JHSItem
 sys.path.append('../db')
-from MongoAccess import MongoAccess
 from MongofsAccess import MongofsAccess
 
 import warnings
@@ -33,11 +32,10 @@ class JHSItemM(MyThread):
 
         # db
         self.mysqlAccess = MysqlAccess() # mysql access
-        #self.mongoAccess = MongoAccess() # mongodb access
         self.mongofsAccess = MongofsAccess() # mongodb fs access
 
         # jhs queue type
-        self.jhs_type = jhs_type # 1:新增商品, 2:每天一次的商品, 3:每小时一次的商品
+        self.jhs_type = jhs_type # 1 or main:新增商品, day:每天一次的商品, hour:每小时一次的商品
 
         # appendix val
         self.a_val = a_val
@@ -145,9 +143,8 @@ class JHSItemM(MyThread):
         _iteminfosql_list = []
         _itemdaysql_list = []
         _itemhoursql_list = []
-        _itemlocksql_list = []
-        _itemupdatesql_list = []
         _itemremindsql_list = []
+        #_itemupdatesql_list = []
         while True:
             _data = None
             try:
@@ -155,6 +152,7 @@ class JHSItemM(MyThread):
                     # 取队列消息
                     _data = self.get_q()
                 except Empty as e:
+                    """
                     # 队列为空，退出
                     #print '# queue is empty', e
                     # info
@@ -170,12 +168,13 @@ class JHSItemM(MyThread):
                     _itemhoursql_list = []
 
                     # update
-                    self.updateItems(_itemupdatesql_list, True)
-                    _itemupdatesql_list = []
+                    #self.updateItems(_itemupdatesql_list, True)
+                    #_itemupdatesql_list = []
 
                     # remind
                     self.updateItemRemind(_itemremindsql_list, True)
                     _itemremindsql_list = []
+                    """
 
                     break
 
@@ -231,12 +230,9 @@ class JHSItemM(MyThread):
                     # 汇聚
                     self.push_back(self.items, item.outTupleHour())
 
-                    #hourSql = item.outSqlForHour()
                     hourSql,lockSql = item.outTupleHour()
                     if lockSql:
                         self.updateItem(lockSql)
-                    #    _itemlocksql_list.append(lockSql)
-                    #if self.updateItem(_itemlocksql_list): _itemlocksql_list = []
 
                     _itemhoursql_list.append(hourSql)
                     if self.insertItemhour(_itemhoursql_list): _itemhoursql_list = []
@@ -255,52 +251,19 @@ class JHSItemM(MyThread):
                     item.antPageUpdate(_val)
                     crawl_type = 'update'
                     # 汇聚
-                    self.push_back(self.items, item.outTupleUpdate())
+                    self.push_back(self.items, item.outSqlForUpdate())
 
-                    updateSql = item.outTupleUpdate()
-
+                    updateSql = item.outSqlForUpdate()
                     if updateSql:
-                        _itemupdatesql_list.append(updateSql)
-                    if self.updateItems(_itemupdatesql_list): _itemupdatesql_list = []
-
-                elif self.jhs_type == 's':
-                    # 更新商品关注人数
-                    item = JHSItem()
-                    _val = _data[1]
-                    if self.a_val: _val = _val + self.a_val
-
-                    item.antPageUpdateRemind(_val)
-                    #print '# Hour To crawl activity item val : ', Common.now_s(), _val[0], _val[4], _val[5]
-                    crawl_type = 'update'
-                    # 汇聚
-                    self.push_back(self.items, item.outTupleUpdateRemind())
-
-                    remindSql = item.outTupleUpdateRemind()
-
-                    if remindSql:
-                        _itemremindsql_list.append(remindSql)
-                    if self.updateItemRemind(_itemremindsql_list): _itemremindsql_list = []
-                elif self.jhs_type == 'l':
-                    # 商品islock标志
-                    item = JHSItem()
-                    _val = _data[1]
-                    if self.a_val: _val = _val + self.a_val
-
-                    item.antPageLock(_val)
-                    #print '# Hour To crawl activity item val : ', Common.now_s(), _val[0], _val[4], _val[5]
-                    crawl_type = 'itemlock'
-                    # 汇聚
-                    lockSql = item.outSqlForLock()
-
-                    if lockSql:
-                        _itemlocksql_list.append(lockSql)
-                    if self.updateItem(_itemlocksql_list): _itemlocksql_list = []
+                        self.mysqlAccess.updateJhsItems([updateSql])
+                    #if updateSql:
+                    #    _itemupdatesql_list.append(updateSql)
+                    #if self.updateItems(_itemupdatesql_list): _itemupdatesql_list = []
 
                 # 存网页
-                if item and crawl_type != '':
-                    _pages = item.outItemPage(crawl_type)
-                #    self.mongoAccess.insertJHSPages(_pages)
-                    self.mongofsAccess.insertJHSPages(_pages)
+                #if item and crawl_type != '':
+                #    _pages = item.outItemPage(crawl_type)
+                #    self.mongofsAccess.insertJHSPages(_pages)
 
 
                 # 延时

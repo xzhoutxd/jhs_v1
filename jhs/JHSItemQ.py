@@ -28,12 +28,12 @@ class JHSItemQ():
 
     # clear item queue
     def clearItemQ(self,q_type):
-        _key = '%s_item_%s' % (self.jhs_type,self.item_type,q_type)
+        _key = '%s_%s_%s' % (self.jhs_type,self.item_type,q_type)
         self.redisQueue.clear_q(_key)
 
     # 写入redis queue
     def putItemQ(self, q_type, _msg):
-        _key = '%s_item_%s' % (self.jhs_type,self.item_type,q_type)
+        _key = '%s_%s_%s' % (self.jhs_type,self.item_type,q_type)
         _data = _msg
         self.redisQueue.put_q(_key, _data)
 
