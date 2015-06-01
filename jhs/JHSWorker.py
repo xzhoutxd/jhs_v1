@@ -255,12 +255,12 @@ class JHSWorker():
             # mysql
             if prev_act:
                 print '# update activity, id:%s name:%s'%(act.brandact_id, act.brandact_name)
-                self.mysqlAccess.updateJhsAct([act.outSqlForUpdate()])
+                self.mysqlAccess.updateJhsAct(act.outSqlForUpdate())
             else:
                 print '# insert activity, id:%s name:%s'%(act.brandact_id, act.brandact_name)
-                self.mysqlAccess.insertJhsAct([act.outSql()])
+                self.mysqlAccess.insertJhsAct(act.outSql())
             # 预热信息
-            self.mysqlAccess.insertJhsActComing([act.outSqlForComing()])
+            self.mysqlAccess.insertJhsActComing(act.outSqlForComing())
 
         # mongo
         # 存网页
@@ -294,7 +294,7 @@ class JHSWorker():
     def process(self, _obj, _crawl_type, _val=None):
         self.init_crawl(_obj, _crawl_type)
 
-        i, M = 0, 5
+        i, M = 0, 3
         n = 0
         while True: 
             if _crawl_type and _crawl_type != '':

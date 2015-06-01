@@ -96,14 +96,14 @@ class JHSBrandMain():
             print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             obj = 'act'
             crawl_type = 'main'
-            #self.work.process(obj, crawl_type)
+            self.work.process(obj, crawl_type)
             # JHS worker 多进程对象实例
-            p_num = 4
-            m = JHSWorkerM(p_num)
+            #p_num = 4
+            #m = JHSWorkerM(p_num)
             # 多进程并发处理
             # 附加的信息
-            m.createProcess((obj, crawl_type))
-            m.run()
+            #m.createProcess((obj, crawl_type))
+            #m.run()
 
         except Exception as e:
             print '# exception err in antPage info:',e

@@ -56,6 +56,7 @@ class JHSBrandUpdate():
                             act_items[str(item[0])]["items"].append(item[2:]) 
                         else:
                             act_items[str(item[0])] = {'act_name':item[1],'items':[]}
+                            act_items[str(item[0])]["items"].append(item[2:])
                         all_item_num += 1
                     for key in act_items.keys():
                         update_val_list.append((key,act_items[key]["act_name"],act_items[key]["items"]))
@@ -71,7 +72,7 @@ class JHSBrandUpdate():
                 print '# item queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             # JHS worker 多进程对象实例
-            p_num = 4
+            p_num = 1
             m = JHSWorkerM(p_num)
 
             # 多进程并发处理

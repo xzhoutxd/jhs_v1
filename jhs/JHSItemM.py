@@ -114,10 +114,10 @@ class JHSItemM(MyThread):
             return True
         return False
 
-    # update item
-    def updateItem(self, itemsql):
+    # update item lock start-end time
+    def updateItemLockStartEndtime(self, itemsql):
         if itemsql:
-            self.mysqlAccess.updateJhsItem(itemsql)
+            self.mysqlAccess.updateJhsItemLockStartEndtime(itemsql)
             #print '# update data to database'
 
     def updateItems(self, itemsql_list, f=False):
@@ -152,7 +152,6 @@ class JHSItemM(MyThread):
                     # 取队列消息
                     _data = self.get_q()
                 except Empty as e:
-                    """
                     # 队列为空，退出
                     #print '# queue is empty', e
                     # info
@@ -172,9 +171,8 @@ class JHSItemM(MyThread):
                     #_itemupdatesql_list = []
 
                     # remind
-                    self.updateItemRemind(_itemremindsql_list, True)
-                    _itemremindsql_list = []
-                    """
+                    #self.updateItemRemind(_itemremindsql_list, True)
+                    #_itemremindsql_list = []
 
                     break
 
@@ -195,7 +193,7 @@ class JHSItemM(MyThread):
                     # 入库
                     _iteminfosql_list.append(iteminfoSql)
                     if self.insertIteminfo(_iteminfosql_list): _iteminfosql_list = []
-                elif self.jhs_type == 'd':
+                elif self.jhs_type == 'day':
                     # 每天一次商品实例
                     item = JHSItem()
                     _val = _data[1]
@@ -210,15 +208,15 @@ class JHSItemM(MyThread):
                     #daysql = item.outTupleDay()
                     daySql,lockSql = item.outTupleDay()
                     if lockSql:
-                        self.updateItem(lockSql)
+                        self.updateItemLockStartEndtime(lockSql)
                     _itemdaysql_list.append(daySql)
                     if self.insertItemday(_itemdaysql_list): _itemdaysql_list = []
 
-                    remindSql = item.outTupleUpdateRemind()
-                    if remindSql:
-                        _itemremindsql_list.append(remindSql)
-                    if self.updateItemRemind(_itemremindsql_list): _itemremindsql_list = []
-                elif self.jhs_type == 'h':
+                    #remindSql = item.outTupleUpdateRemind()
+                    #if remindSql:
+                    #    _itemremindsql_list.append(remindSql)
+                    #if self.updateItemRemind(_itemremindsql_list): _itemremindsql_list = []
+                elif self.jhs_type == 'hour':
                     # 每小时一次商品实例
                     item = JHSItem()
                     _val = _data[1]
@@ -232,15 +230,15 @@ class JHSItemM(MyThread):
 
                     hourSql,lockSql = item.outTupleHour()
                     if lockSql:
-                        self.updateItem(lockSql)
+                        self.updateItemLockStartEndtime(lockSql)
 
                     _itemhoursql_list.append(hourSql)
                     if self.insertItemhour(_itemhoursql_list): _itemhoursql_list = []
 
-                    remindSql = item.outTupleUpdateRemind()
-                    if remindSql:
-                        _itemremindsql_list.append(remindSql)
-                    if self.updateItemRemind(_itemremindsql_list): _itemremindsql_list = []
+                    #remindSql = item.outTupleUpdateRemind()
+                    #if remindSql:
+                    #    _itemremindsql_list.append(remindSql)
+                    #if self.updateItemRemind(_itemremindsql_list): _itemremindsql_list = []
 
                 elif self.jhs_type == 'update':
                     # 更新商品
