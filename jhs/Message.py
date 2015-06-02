@@ -24,6 +24,33 @@ class Message():
         cat["refers"] = _refers
         return cat
 
+    # 商品Redis数据
+    def jhsitemMsg(self, _item):
+        item_juid, item_id, item_position, item_ju_url, item_juname, item_judesc, item_jupic_url, item_url, item_oriprice, item_actprice, item_discount, item_coupons, item_promotions, item_remindnum, item_islock_time, item_islock, start_time, end_time = _item
+        item = {}
+        item["item_juid"]           = str(item_juid)
+        item["item_id"]             = str(item_id)
+        item["item_position"]       = str(item_position)
+        item["item_ju_url"]         = item_ju_url
+        item["item_juname"]         = item_juname
+        item["item_judesc"]         = item_judesc
+        item["item_jupic_url"]      = item_jupic_url
+        item["item_url"]            = item_url
+        item["item_oriprice"]       = str(item_oriprice)
+        item["item_actprice"]       = str(item_actprice)
+        item["item_discount"]       = str(item_discount)
+        item["item_coupons"]        = item_coupons
+        item["item_promotions"]     = item_promotions
+        item["item_remindnum"]      = str(item_remindnum)
+        if item_islock_time:
+            item["item_islock_time"]    = str(item_islock_time)
+        else:
+            item["item_islock_time"]    = ''
+        item["item_islock"]         = str(item_islock)
+        item["start_time"]          = str(start_time)
+        item["end_time"]            = str(end_time)
+        return item
+
     ##### 商品团 #####
     # 商品解析数据
     def itemParseInfo(self, _item):

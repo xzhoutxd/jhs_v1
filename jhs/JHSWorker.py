@@ -231,6 +231,26 @@ class JHSWorker():
             # 取第一次的活动抓取时间
             act.crawling_time_s = prev_act["crawl_time"]
 
+            if not act.brandact_name or act.brandact_name == '':
+                act.brandact_name = prev_act["act_name"]
+            if not act.brandact_url or act.brandact_url == '':
+                act.brandact_url = prev_act["act_url"]
+            if not act.brandact_position or str(act.brandact_position) == '0':
+                act.brandact_position = prev_act["act_position"]
+            if not act.brandact_enterpic_url or act.brandact_enterpic_url == '':
+                act.brandact_enterpic_url = prev_act["act_enterpic_url"]
+            if not act.brandact_remindNum or str(act.brandact_remindNum) == '0':
+                act.brandact_remindNum = prev_act["act_remindnum"]
+            if not act.brandact_coupons or act.brandact_coupons == []:
+                act.brandact_coupon = prev_act["act_coupon"]
+                act.brandact_coupons = prev_act["act_coupons"].split(Config.sep)
+            if not act.brandact_starttime or act.brandact_starttime == 0.0: 
+                act.brandact_starttime = Common.str2timestamp(prev_act["start_time"])
+            if not act.brandact_endtime or act.brandact_endtime == 0.0:
+                act.brandact_endtime = Common.str2timestamp(prev_act["end_time"])
+            if not act.brandact_other_ids or act.brandact_other_ids == '':
+                act.brandact_other_ids = prev_act["_act_ids"]
+
     # 删除redis数据库过期活动
     def delAct(self, _acts):
         for _act in _acts:
@@ -329,11 +349,53 @@ class JHSWorker():
         self.delAct(end_acts)
         return _acts
 
+    # acts redis
+    def actsRedis(self):
+        i = 0
+        _acts = self.mysqlAccess.selectActsRedisdata()
+        print '# acts num:',len(_acts)
+        for _act in _acts:
+            act_id = _act[2]
+            _itemids = self.mysqlAccess.selectItemsids(str(act_id))
+            item_ids = []
+            for _itemid in _itemids:
+                item_ids.append(str(_itemid[0]))
+                item_ids.append(str(_itemid[1]))
+            act_val = _act + (item_ids,)
+            #print act_val
+            keys = [self.worker_type, str(act_id)]
+            #print keys
+            #if self.redisAccess.exist_jhsact(keys):
+                #i += 1
+                #print self.redisAccess.read_jhsact(keys)
+                #self.redisAccess.delete_jhsact(keys)
+            #self.redisAccess.write_jhsact(keys, act_val)
+            #i += 1
+            #break
+        print '# redis acts num:',i
+
+    # items redis
+    def itemsRedis(self):
+        _items = self.mysqlAccess.selectItemRedisdata()
+        print '# items num:', len(_items)
+        i = 0
+        for _item in _items:
+            msg = self.message.jhsitemMsg(_item)
+            #print msg
+            keys = [self.worker_type, str(_item[0])]
+            #print keys
+            #if self.redisAccess.exist_jhsitem(keys):
+                #print self.redisAccess.read_jhsitem(keys)
+                #self.redisAccess.delete_jhsitem(keys)
+            #self.redisAccess.write_jhsitem(keys, msg)
+            #i += 1 
+            #break
+        print '# redis items num:',i
+        
+            
+
 if __name__ == '__main__':
     w = JHSWorker()
-    act_list = [{"act_id":"6958193"}]
-    keys = [w.worker_type, "6958193"]
-    #w.redisAccess.delete_jhsact(keys)
-    item = w.redisAccess.read_jhsact(keys)
-    print item
+    #w.actsRedis()
+    w.itemsRedis()
 

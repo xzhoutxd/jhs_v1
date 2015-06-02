@@ -638,7 +638,6 @@ class JHSItem():
     # Day
     def antPageDay(self, val):
         self.item_juId,self.item_actId,self.item_actName,self.item_act_url,self.item_juName,self.item_ju_url,self.item_id,self.item_url,self.item_oriPrice,self.item_actPrice,self.crawling_begintime = val
-
         # 本次抓取开始日期
         self.crawling_beginDate = time.strftime("%Y-%m-%d", time.localtime(self.crawling_begintime))
         # 本次抓取开始小时
@@ -658,7 +657,12 @@ class JHSItem():
 
     # Hour
     def antPageHour(self, val):
-        self.item_juId,self.item_actId,self.item_ju_url,self.item_act_url,self.item_id,self.crawling_begintime,self.hour_index = val
+        self.item_juId,self.item_actId,self.item_ju_url,self.item_act_url,self.item_id,self.crawling_begintime = val
+        # 本次抓取开始日期
+        self.crawling_beginDate = time.strftime("%Y-%m-%d", time.localtime(self.crawling_begintime))
+        # 本次抓取开始小时
+        self.crawling_beginHour = time.strftime("%H", time.localtime(self.crawling_begintime))
+
         # 聚划算商品页信息
         #self.itemPage()
         self.itemConfig()
@@ -747,7 +751,7 @@ class JHSItem():
 
     # 每小时的SQL
     def outSqlForHour(self):
-        return (Common.date_s(self.crawling_time),str(self.hour_index),str(self.item_juId),str(self.item_actId),str(self.item_soldCount),str(self.item_stock))
+        return (self.crawling_beginDate,self.crawling_beginHour,str(self.item_juId),str(self.item_actId),str(self.item_soldCount),str(self.item_stock))
 
     # 商品锁定信息
     def outSqlForLock(self):
@@ -783,8 +787,7 @@ class JHSItem():
         item_remindNum = ''
         if str(self.item_remindNum) != '':
             item_remindNum = str(self.item_remindNum)
-            
-        return (self.item_juId,self.item_id,self.item_juName,self.item_juDesc,Common.fix_url(self.item_juPic_url),Common.fix_url(self.item_url),str(self.item_oriPrice),str(self.item_actPrice),str(self.item_discount),Config.sep.join(self.item_coupons),Config.sep.join(self.item_promotions),item_remindNum,item_isLock_time,self.item_isLock,item_starttime,item_endtime)
+        return (self.item_juId,self.item_id,self.item_juName,self.item_juDesc,Common.fix_url(self.item_juPic_url),Common.fix_url(self.item_url),str(self.item_oriPrice),str(self.item_actPrice),str(self.item_discount),Config.sep.join(self.item_coupons),Config.sep.join(self.item_promotions),item_remindNum,item_isLock_time,str(self.item_isLock),item_starttime,item_endtime)
         
     # 输出Tuple
     def outTuple(self):
@@ -807,6 +810,23 @@ class JHSItem():
     def outTupleUpdateRemind(self):
         sql = self.outSqlForUpdateRemind()
         return sql
+    
+    def outTupleForRedis(self):
+        item_isLock_time = ''
+        if self.item_isLock_time:
+            item_isLock_time = Common.time_s(self.item_isLock_time)
+        item_starttime = ''
+        if self.item_starttime and float(self.item_starttime) != 0.0:
+            item_starttime = Common.time_s(float(self.item_starttime)/1000)
+        item_endtime = ''
+        if self.item_endtime and float(self.item_endtime) != 0.0:
+            item_endtime = Common.time_s(float(self.item_endtime)/1000)
+        item_remindNum = ''
+        if str(self.item_remindNum) != '':
+            item_remindNum = str(self.item_remindNum)
+        return (self.item_juId,self.item_id,str(self.item_position),Common.fix_url(self.item_ju_url),self.item_juName,self.item_juDesc,Common.fix_url(self.item_juPic_url),Common.fix_url(self.item_url),str(self.item_oriPrice),str(self.item_actPrice),str(self.item_discount),Config.sep.join(self.item_coupons),Config.sep.join(self.item_promotions),item_remindNum,item_isLock_time,str(self.item_isLock),item_starttime,item_endtime)
+
+
 
     # 商品团商品全部信息sql
     def outGroupIteminfoSql(self):

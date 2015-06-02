@@ -19,43 +19,35 @@ from JHSWorkerM import JHSWorkerM
 class JHSBrandHour():
     '''A class of brand for every hour'''
     def __init__(self, m_type):
+        # 队列标志
+        self._obj = 'item'
+        self._crawl_type = 'hour'
+
         # mysql
         self.mysqlAccess = MysqlAccess()
 
         # item queue
         self.item_queue = JHSItemQ()
 
-        self.work = JHSWorker()
+        #self.work = JHSWorker()
 
         # 抓取开始时间
-        self.crawling_time = Common.now() # 当前爬取时间
         self.begin_time = Common.now()
-        self.begin_date = Common.today_s()
-        self.begin_hour = Common.nowhour_s()
 
         # 分布式主机标志
         self.m_type = m_type
-
-        # 队列标志
-        self._obj = 'item'
-        self._crawl_type = 'hour'
 
     def antPage(self):
         try:
             # 主机器需要配置redis队列
             if self.m_type == 'm':
                 self.brandHourList()
-            # 附加信息
-            a_val = (self.begin_time, self.begin_hour)
-            self.work.process(self._obj, self._crawl_type, a_val)
 
-            # JHS worker 多进程对象实例
-            #p_num = 4
-            #m = JHSWorkerM(p_num)
-            # 多进程并发处理
-            # 附加的信息
-            #m.createProcess((self._obj, self._crawl_type, a_val))
-            #m.run()
+            """
+            # 附加信息
+            a_val = (self.begin_time,)
+            self.work.process(self._obj, self._crawl_type, a_val)
+            """
         except Exception as e:
             Common.traceback_log()
 
@@ -63,7 +55,7 @@ class JHSBrandHour():
     def brandHourList(self):
         # 查找需要每小时统计的列表
         # 得到需要的时间段
-        val = (Common.add_hours(self.crawling_time), Common.add_hours(self.crawling_time, -1))
+        val = (Common.add_hours(self.begin_time), Common.add_hours(self.begin_time, -1))
         print '# hour crawler time:',val
         
         # 商品默认信息列表
@@ -103,6 +95,6 @@ if __name__ == '__main__':
     m_type = args[1]
     b = JHSBrandHour(m_type)
     b.antPage()
-    time.sleep(1)
+    time.sleep(5)
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 

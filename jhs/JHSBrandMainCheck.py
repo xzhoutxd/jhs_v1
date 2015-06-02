@@ -19,19 +19,24 @@ from JHSWorkerM import JHSWorkerM
 class JHSBrandMainCheck():
     '''A class of brand check'''
     def __init__(self, m_type):
+        # 队列标志
+        self._obj = 'act'
+        self._crawl_type = 'check'
+
         # act queue
-        self.act_queue = JHSActQ('check')
+        self.act_queue = JHSActQ(self._crawl_type)
 
         # DB
         self.mysqlAccess = MysqlAccess()     # mysql access
 
         #self.work = JHSWorker()
 
+        # 抓取开始时间
+        self.begin_time = Common.now()
+
         # 分布式主机标志
         self.m_type = m_type
 
-        # 抓取开始时间
-        self.begin_time = Common.now()
 
     def antPage(self):
         try:
@@ -56,15 +61,9 @@ class JHSBrandMainCheck():
                 self.act_queue.putActlistQ(act_val_list)
                 print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            obj = 'act'
-            crawl_type = 'check'
-            #self.work.process(obj, crawl_type)
-            # JHS worker 多进程对象实例
-            p_num = 4
-            m = JHSWorkerM(p_num)
-            # 多进程并发处理
-            m.createProcess((obj, crawl_type))
-            m.run()
+            """
+            #self.work.process(self._obj, self._crawl_type)
+            """
 
         except Exception as e:
             print '# exception err in antPage info:',e
@@ -81,6 +80,6 @@ if __name__ == '__main__':
     m_type = args[1]
     b = JHSBrandMainCheck(m_type)
     b.antPage()
-    time.sleep(1)
+    time.sleep(5)
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 

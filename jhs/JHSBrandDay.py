@@ -18,42 +18,35 @@ from JHSWorkerM import JHSWorkerM
 
 class JHSBrandDay():
     '''A class of brand for every day'''
-    def __init__(self, m_type, _q_type='d'):
+    def __init__(self, m_type):
+        # 队列标志
+        self._obj = 'item'
+        self._crawl_type = 'day'
+
         # mysql
         self.mysqlAccess = MysqlAccess()
 
         # item queue
         self.item_queue = JHSItemQ()
 
-        self.work = JHSWorker()
+        #self.work = JHSWorker()
 
         # 抓取开始时间
-        self.crawling_time = Common.now() # 当前爬取时间
         self.begin_time = Common.now()
 
         # 分布式主机标志
         self.m_type = m_type
-        # 队列标志
-        self._obj = 'item'
-        self._crawl_type = 'hour'
 
     def antPage(self):
         try:
             # 主机器需要配置redis队列
             if self.m_type == 'm':
                 self.brandDayList()
+            """
             # 附加信息
             a_val = (self.begin_time,)
             #self.work.process(self._obj, self._crawl_type, a_val)
-
-            # JHS worker 多进程对象实例
-            #p_num = 4
-            #m = JHSWorkerM(p_num)
-            # 多进程并发处理
-            # 附加的信息
-            #m.createProcess((self._obj, self._crawl_type, a_val))
-            #m.run()
-
+            """
         except Exception as e:
             Common.traceback_log()
 
@@ -61,7 +54,7 @@ class JHSBrandDay():
     def brandDayList(self):
         # 查找需要每天统计的活动列表
         # 当前时刻减去24小时
-        val = (Common.today_s()+" 00:00:00",Common.add_hours(self.crawling_time, -24))
+        val = (Common.today_s()+" 00:00:00",Common.add_hours(self.begin_time, -24))
         print '# day crawler time:',val
         # 商品默认信息列表
         all_item_num = 0
@@ -84,9 +77,9 @@ class JHSBrandDay():
         print '# day all item nums:',all_item_num
         print '# need update all acts nums:',len(day_val_list)
         # 清空每天抓取redis队列
-        #self.item_queue.clearItemQ(self._crawl_type)
+        self.item_queue.clearItemQ(self._crawl_type)
         # 保存每天抓取redis队列
-        #self.item_queue.putItemlistQ(self._crawl_type, day_val_list)
+        self.item_queue.putItemlistQ(self._crawl_type, day_val_list)
         print '# item queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
 if __name__ == '__main__':
@@ -100,6 +93,6 @@ if __name__ == '__main__':
     m_type = args[1]
     b = JHSBrandDay(m_type)
     b.antPage()
-    time.sleep(1)
+    time.sleep(5)
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 

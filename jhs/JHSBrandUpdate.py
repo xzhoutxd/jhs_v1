@@ -18,31 +18,32 @@ from JHSWorkerM import JHSWorkerM
 class JHSBrandUpdate():
     '''A class of brand update'''
     def __init__(self, m_type):
+        # 队列标志
+        self._obj = 'item'
+        self._crawl_type = 'update'
+
         # DB
-        self.mysqlAccess   = MysqlAccess()     # mysql access
+        self.mysqlAccess = MysqlAccess()     # mysql access
 
         # item queue
         self.item_queue = JHSItemQ()
 
-        # 分布式主机标志
-        self.m_type = m_type
-
         # 抓取开始时间
-        self.crawling_time = Common.now()
         self.begin_time = Common.now()
 
         # 即将开团的最小时间
-        self.min_hourslot = 20 # 最小时间段
+        self.min_hourslot = 5 # 最小时间段
+
+        # 分布式主机标志
+        self.m_type = m_type
 
     def antPage(self):
         try:
-            obj = 'item'
-            crawl_type = 'update'
             # 更新即将开团活动的商品信息
             # 主机器需要配置redis队列
             if self.m_type == 'm':
                 # 一个小时即将开团
-                val = (Common.time_s(self.crawling_time),Common.add_hours(self.crawling_time, self.min_hourslot))
+                val = (Common.time_s(self.begin_time),Common.add_hours(self.begin_time, self.min_hourslot))
                 print '# update time:',val
 
                 # 商品默认信息列表
@@ -66,20 +67,16 @@ class JHSBrandUpdate():
                 print '# need update all acts nums:',len(update_val_list)
 
                 # 清空redis队列
-                self.item_queue.clearItemQ(crawl_type)
+                self.item_queue.clearItemQ(self._crawl_type)
                 # 保存到redis队列
-                self.item_queue.putItemlistQ(crawl_type, update_val_list)
+                self.item_queue.putItemlistQ(self._crawl_type, update_val_list)
                 print '# item queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            # JHS worker 多进程对象实例
-            p_num = 1
-            m = JHSWorkerM(p_num)
-
-            # 多进程并发处理
+            """
             # 附加的信息
             a_val = (self.begin_time,)
-            m.createProcess((obj, crawl_type, a_val))
-            m.run()
+            self.work.process(self._obj, self._crawl_type, a_val)
+            """
             
         except Exception as e:
             print '# exception err in antPage info:',e
@@ -96,7 +93,7 @@ if __name__ == '__main__':
     m_type = args[1]
     b = JHSBrandUpdate(m_type)
     b.antPage()
-    time.sleep(1)
+    time.sleep(5)
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
 

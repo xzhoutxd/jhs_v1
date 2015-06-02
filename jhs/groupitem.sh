@@ -11,7 +11,7 @@ else
 fi
 DIR=`pwd`
 cd $DIR
-/bin/sh $DIR/k.sh JHSGroupItem
+/bin/sh $DIR/k.sh JHSGroupItem python python
 
 cd $DIR/../..
 LOGDIR=`pwd`

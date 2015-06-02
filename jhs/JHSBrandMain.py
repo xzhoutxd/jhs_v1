@@ -17,10 +17,9 @@ from db.MysqlAccess import MysqlAccess
 from JHSCatQ import JHSCatQ
 from JHSActQ import JHSActQ
 from JHSWorker import JHSWorker
-from JHSWorkerM import JHSWorkerM
 
 class JHSBrandMain():
-    '''A class of brand main'''
+    '''A class of brand Main'''
     def __init__(self, m_type):
         # 抓取设置
         self.crawler = RetryCrawler()
@@ -39,14 +38,14 @@ class JHSBrandMain():
 
         self.work = JHSWorker()
 
-        # 分布式主机标志
-        self.m_type = m_type
-
         # 页面信息
         self.ju_brand_page = '' # 聚划算品牌团页面
 
         # 抓取开始时间
         self.begin_time = Common.now()
+
+        # 分布式主机标志
+        self.m_type = m_type
 
     def antPage(self):
         try:
@@ -76,7 +75,7 @@ class JHSBrandMain():
                 # 清空act redis队列
                 self.act_queue.clearActQ()
 
-            # 类目的活动Json数据
+            # 类目的活动Json
             obj = 'cat'
             crawl_type = None
             # 获取还没有开团的活动id
@@ -89,21 +88,17 @@ class JHSBrandMain():
             a_val = (self.begin_time, brandact_id_list)
             self.work.process(obj,crawl_type,a_val)
 
-            # 活动
+            # 活动数据
             act_val_list = self.work.items
             # 保存到redis队列
             self.act_queue.putActlistQ(act_val_list)
             print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            obj = 'act'
-            crawl_type = 'main'
-            self.work.process(obj, crawl_type)
-            # JHS worker 多进程对象实例
-            #p_num = 4
-            #m = JHSWorkerM(p_num)
-            # 多进程并发处理
-            # 附加的信息
-            #m.createProcess((obj, crawl_type))
-            #m.run()
+
+            """
+            #obj = 'act'
+            #crawl_type = 'main'
+            #self.work.process(obj,crawl_type)
+            """
 
         except Exception as e:
             print '# exception err in antPage info:',e
@@ -120,7 +115,7 @@ if __name__ == '__main__':
     m_type = args[1]
     b = JHSBrandMain(m_type)
     b.antPage()
-    time.sleep(1)
+    time.sleep(5)
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
 

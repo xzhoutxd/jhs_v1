@@ -11,7 +11,7 @@ else
 fi
 DIR=`pwd`
 cd $DIR
-/bin/sh $DIR/k.sh JHSBrandUpdate
+/bin/sh $DIR/k.sh JHSBrandUpdate python python
 
 cd $DIR/../..
 LOGDIR=`pwd`
@@ -19,4 +19,15 @@ LOGFILE=$LOGDIR/logs/jhs/brand_update/add_updateBrands_${DATESTR}.log
 
 cd $DIR
 /usr/local/bin/python $DIR/JHSBrandUpdate.py $m_type > $LOGFILE
+
+# process queue
+p_num=4
+obj='item'
+crawl_type='update'
+DIR=`pwd`
+cd $DIR
+/bin/sh $DIR/k.sh JHSWorkerM $obj $crawl_type
+
+/usr/local/bin/python $DIR/JHSWorkerM.py $p_num $obj $crawl_type >> $LOGFILE
+
 

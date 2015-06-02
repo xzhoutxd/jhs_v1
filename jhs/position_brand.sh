@@ -4,7 +4,7 @@ DATESTR=`date +"%Y%m%d%H"`
 
 DIR=`pwd`
 cd $DIR
-/bin/sh $DIR/k.sh JHSBrandPosition
+/bin/sh $DIR/k.sh JHSBrandPosition python python
 
 cd $DIR/../..
 LOGDIR=`pwd`

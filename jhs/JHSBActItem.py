@@ -835,31 +835,18 @@ class JHSBActItem():
 
     # 更新活动
     def outSqlForUpdate(self):
-        return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_inJuHome),str(self.brandact_juHome_position),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_other_ids,str(self.brandact_sign))
-
-    # 每天抓取
-    def outSqlForDay(self):
-        return (str(self.brandact_id),str(self.brandact_catgoryId),self.brandact_catgoryName,self.brandact_name,Common.fix_url(self.brandact_url),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
-
-    # 每小时抓取
-    def outSqlForHour(self):
-        return (str(self.brandact_id),str(self.brandact_catgoryId),self.brandact_catgoryName,self.brandact_name,Common.fix_url(self.brandact_url),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
+        return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_other_ids,str(self.brandact_sign))
 
     # 输出元组
     def outTuple(self):
         if self.crawling_confirm == 1:
             main_sql = self.outSql()
-            day_sql = self.outSqlForDay()
-            hour_sql = self.outSqlForHour()
-            #return (self.brandact_itemVal_list, main_sql, day_sql, hour_sql, self.crawling_confirm)
-            return (self.crawling_confirm,self.brandact_id,self.brandact_name,(self.brandact_itemVal_list, main_sql, day_sql, hour_sql))
+            return (self.crawling_confirm,self.brandact_id,self.brandact_name,(self.brandact_itemVal_list, main_sql))
         elif self.crawling_confirm == 0:
             update_sql = self.outSqlForUpdate()
             return (self.crawling_confirm,self.brandact_id,self.brandact_name,(update_sql))
         else:
-            day_sql = self.outSqlForDay()
-            hour_sql = self.outSqlForHour()
-            return (self.crawling_confirm,self.brandact_id,self.brandact_name,(day_sql, hour_sql))
+            return (self.crawling_confirm,self.brandact_id,self.brandact_name)
 
     # 输出每小时检查活动的元组
     def outTupleForHourcheck(self):
@@ -872,13 +859,7 @@ class JHSBActItem():
         return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,str(self.brandact_position),str(self.brandact_catgoryId),self.brandact_catgoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate))
 
     def outTupleForRedis(self):
-        return (self.crawling_time_s,str(self.brandact_catgoryId),str(self.brandact_id),self.brandact_name,self.brandact_url,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_itemids)
+        return (self.crawling_time_s,str(self.brandact_catgoryId),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_sign),self.brandact_other_ids,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_itemids)
 
-
-def test():
-    pass
-
-
-#
 if __name__ == '__main__':
-    test()
+    pass
