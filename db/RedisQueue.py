@@ -17,9 +17,6 @@ class RedisQueue:
 
         # 抓取队列   tm:1, tb:2, vip:3, jhs:4
         self.q_list = [
-                #'1_shop', '1_shopitem', '1_item',    # 天猫shop, shopitem, item
-                #'2_shop', '2_shopitem', '2_item',    # 淘宝shop, shopitem, item
-                #'3_act',  '3_sku_h',    '3_sku_d',   # 唯品会activity, 每小时sku, 每日sku
                 '4_cat', '4_act_main', '4_act_check', '4_item_update', '4_item_hour', '4_item_day', # 聚划算品牌团 类别 活动 商品
                 '4_groupitem_h', '4_groupitemcat_h' # 聚划算商品团 商品每小时销售, 类别每小时商品
             ]

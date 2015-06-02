@@ -30,7 +30,7 @@ class MysqlAccess():
     # 更新活动信息
     def updateJhsAct(self, args):
         try:
-            sql = 'call sp_update_jhs_parser_activity(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+            sql = 'call sp_update_jhs_parser_activity(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
             self.jhs_db.execute(sql, args)
             #self.jhs_db.executemany(sql, args_list)
         except Exception, e:
@@ -208,6 +208,28 @@ class MysqlAccess():
             return self.jhs_db.select(sql)
         except Exception, e:
             print '# select SQL exception:', e
+
+    # redis info data
+    def selectActsRedisdata(self):
+        try:
+            sql = 'select crawl_time, category_id, act_id, act_name, act_url, act_position, act_enterpic_url, act_remindnum, act_coupon, act_coupons, act_sign, _act_ids, start_time, end_time from nd_jhs_parser_activity where end_time >= now()'
+            return self.jhs_db.select(sql)
+        except Exception, e:
+            print '# select Jhs not end acts exception:', e
+
+    def selectItemsids(self, actid):
+        try:
+            sql = 'select a.item_juid, b.item_id from nd_jhs_parser_activity_item a join nd_jhs_parser_item_info b on a.item_juid = b.item_juid where a.act_id = %s'
+            return self.jhs_db.select(sql,str(actid))
+        except Exception, e:
+            print '# select Jhs acts item ids exception:', e
+
+    def selectItemRedisdata(self):
+        try:
+            sql = 'select a.item_juid, a.item_id, a.item_position, a.item_ju_url, a.item_juname, a.item_judesc, a.item_jupic_url, a.item_url, a.item_oriprice, a.item_actprice, a.discount, a.item_coupons, a.item_promotions, a.item_remindnum, b.islock_time, b.islock,a.start_time, a.end_time from nd_jhs_parser_item_info a join nd_jhs_mid_item_info b on a.item_juid = b.item_juid where a.end_time >= now()'
+            return self.jhs_db.select(sql)
+        except Exception, e:
+            print '# select Jhs not end items exception:', e
 
     # JHS 商品团
     # 查找商品团分类
