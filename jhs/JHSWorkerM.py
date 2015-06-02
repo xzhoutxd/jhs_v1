@@ -5,6 +5,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 import time
+import base.Common as Common
 from base.ProcessMgr import ProcessMgr
 from JHSWorker import JHSWorker
 

@@ -12,7 +12,7 @@ class Message():
         pass
 
     ##### 品牌团 #####
-    def jhsCatMsg(self, _cat):
+    def jhsCatQueueMsg(self, _cat):
         _retry, _obj, _type, _c_url, _c_id, _c_name, _refers = _cat
         cat = {}
         cat["retry"]  = _retry
@@ -23,6 +23,22 @@ class Message():
         cat["name"]   = _c_name
         cat["refers"] = _refers
         return cat
+
+    def jhsActQueueMsg(self, _act):
+        act = {}
+        act["retry"]  = _act[0]
+        act["obj"]    = _act[1]
+        act["type"]   = _act[2]
+        act["val"]    = _act[3:]
+        return act
+
+    def jhsItemQueueMsg(self, _act):
+        act = {}
+        act["retry"]  = _act[0]
+        act["obj"]    = _act[1]
+        act["type"]   = _act[2]
+        act["val"]    = _act[3:]
+        return act
 
     # 商品Redis数据
     def jhsitemMsg(self, _item):

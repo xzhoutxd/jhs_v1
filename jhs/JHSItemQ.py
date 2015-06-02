@@ -14,92 +14,42 @@ import base.Config as Config
 from JHSItemM import JHSItemM
 from JHSGroupItemM import JHSGroupItemParserM
 from JHSGroupItemM import JHSGroupItemCrawlerM
-#from Message import Message
+from Message import Message
 sys.path.append('../db')
 from RedisQueue  import RedisQueue
+from RedisAccess import RedisAccess
 
 class JHSItemQ():
     '''A class of jhs Item redis queue'''
-    def __init__(self,itemtype='item'):
-        self.jhs_type    = Config.JHS_TYPE   # queue type
-        self.item_type   = itemtype          # item type
+    def __init__(self, _obj, _q_type):
+        self._obj       = _obj
+        self._q_type    = _q_type           # queue type
+        self.jhs_type   = Config.JHS_TYPE   # queue type
         # DB
-        self.redisQueue  = RedisQueue()      # redis queue
+        self.redisQueue = RedisQueue()      # redis queue
+
+        # message
+        self.message    = Message()
+
+        # queue key
+        self._key       = '%s_%s_%s' % (self.jhs_type,self._obj,self._q_type)
 
     # clear item queue
-    def clearItemQ(self,q_type):
-        _key = '%s_%s_%s' % (self.jhs_type,self.item_type,q_type)
-        self.redisQueue.clear_q(_key)
+    def clearItemQ(self):
+        self.redisQueue.clear_q(self._key)
 
     # 写入redis queue
-    def putItemQ(self, q_type, _msg):
-        _key = '%s_%s_%s' % (self.jhs_type,self.item_type,q_type)
+    def putItemQ(self, _msg):
         _data = _msg
-        self.redisQueue.put_q(_key, _data)
+        self.redisQueue.put_q(self._key, _data)
 
     # 转换msg
-    def putItemlistQ(self, q_type, item_list):
+    def putItemlistQ(self, item_list):
         for _item in item_list:
-            #msg = self.q_message.itemMsg(_item)
-            msg = _item
-            self.putItemQ(q_type, msg)
+            _val = (0,self._obj,self.jhs_type) + _item
+            msg = self.message.jhsItemQueueMsg(_val)
+            self.putItemQ(msg)
 
-    # 多线程抓去商品
-    def run_items(self, item_list, item_type, a_val):
-        print '# Items start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-        # 多线程 控制并发的线程数
-        max_th = Config.item_max_th
-        if len(item_list) > max_th:
-            if self.item_type == 'item':
-                m_itemsObj = JHSItemM(item_type, max_th, a_val)
-            else:
-                m_itemsObj = JHSGroupItemCrawlerM(item_type, max_th, a_val)
-        else:
-            if self.item_type == 'item':
-                m_itemsObj = JHSItemM(item_type, len(item_list), a_val)
-            else:
-                m_itemsObj = JHSGroupItemCrawlerM(item_type, len(item_list), a_val)
-        m_itemsObj.createthread()
-        m_itemsObj.putItems(item_list)
-        m_itemsObj.run()
-
-        try:
-            # 重试次数太多没有抓下来的商品
-            giveup_item_list = m_itemsObj.giveup_items
-            print '# Give up items num:', len(giveup_item_list)
-            if len(giveup_item_list) > 0:
-                print '###give up###',giveup_item_list,'###give up###'
-        except Exception as e:
-            print 'Unknown exception item result :', e
-        print '# Items end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-    def itemQ(self, q_type, a_val):
-        i, M = 0, 10
-        n = 0
-        while True: 
-            _key = '%s_%s_%s' % (self.jhs_type,self.item_type,q_type)
-            _data = self.redisQueue.get_q(_key)
-
-            # 队列为空
-            if not _data:
-                #print '# all get itemQ item num:',n
-                #print '# not get itemQ of key:',_key
-                #break
-                i += 1
-                if i > M:
-                    print '# all get itemQ item num:',n
-                    print '# not get itemQ of key:',_key
-                    break
-                time.sleep(10)
-                continue
-            n += 1
-            item_list = []
-            if self.item_type == 'item':
-                item_list = _data
-            else:
-                item_list.append(_data)
-            self.run_items(item_list, q_type, a_val)
 
 
 import threading

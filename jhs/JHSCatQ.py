@@ -11,7 +11,6 @@ import time
 import traceback
 import base.Common as Common
 import base.Config as Config
-from db.MysqlAccess import MysqlAccess
 from Message import Message
 sys.path.append('../db')
 from RedisQueue  import RedisQueue
@@ -20,33 +19,30 @@ from RedisAccess import RedisAccess
 class JHSCatQ():
     '''A class of jhs cat redis queue'''
     def __init__(self):
-        # DB
+        self._obj        = 'cat'
         self.jhs_type    = Config.JHS_TYPE   # queue type
-        self.mysqlAccess = MysqlAccess() # mysql access
+        # DB
         self.redisQueue  = RedisQueue()      # redis queue
-        self.redisAccess = RedisAccess()     # redis db
+        #self.redisAccess = RedisAccess()     # redis db
 
         # message
-        self.message = Message()
+        self.message     = Message()
 
-        # giveup items
-        self.giveup_items = []
+        # queue key
+        self._key        = '%s_%s' % (self.jhs_type, self._obj)
 
     # clear cat queue
     def clearCatQ(self):
-        _key = '%s_cat' % (self.jhs_type)
-        self.redisQueue.clear_q(_key)
+        self.redisQueue.clear_q(self._key)
 
     # 写入redis queue
     def putCatQ(self, _msg):
-        _key = '%s_cat' % (self.jhs_type)
-        self.redisQueue.put_q(_key, _msg)
+        self.redisQueue.put_q(self._key, _msg)
 
     # 转换msg
     def putCatlistQ(self, cat_list):
-        _obj = 'cat'
         for _cat in cat_list:
-            _val = (0,_obj,self.jhs_type) + _cat
-            msg = self.message.jhsCatMsg(_val)
+            _val = (0,self._obj,self.jhs_type) + _cat
+            msg = self.message.jhsCatQueueMsg(_val)
             self.putCatQ(msg)
 

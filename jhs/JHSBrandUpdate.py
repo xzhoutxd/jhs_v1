@@ -26,7 +26,7 @@ class JHSBrandUpdate():
         self.mysqlAccess = MysqlAccess()     # mysql access
 
         # item queue
-        self.item_queue = JHSItemQ()
+        self.item_queue = JHSItemQ(self._obj, self._crawl_type)
 
         # 抓取开始时间
         self.begin_time = Common.now()
@@ -67,9 +67,9 @@ class JHSBrandUpdate():
                 print '# need update all acts nums:',len(update_val_list)
 
                 # 清空redis队列
-                self.item_queue.clearItemQ(self._crawl_type)
+                self.item_queue.clearItemQ()
                 # 保存到redis队列
-                self.item_queue.putItemlistQ(self._crawl_type, update_val_list)
+                self.item_queue.putItemlistQ(update_val_list)
                 print '# item queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             """

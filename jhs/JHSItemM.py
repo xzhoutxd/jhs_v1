@@ -13,9 +13,11 @@ import base.Common as Common
 from dial.DialClient import DialClient
 from base.MyThread  import MyThread
 from Queue import Empty
+from Message import Message
 from db.MysqlAccess import MysqlAccess
 from JHSItem import JHSItem
 sys.path.append('../db')
+from RedisAccess import RedisAccess
 from MongofsAccess import MongofsAccess
 
 import warnings
@@ -23,38 +25,44 @@ warnings.filterwarnings("ignore")
 
 class JHSItemM(MyThread):
     '''A class of jhs item thread manager'''
-    def __init__(self, jhs_type, thread_num=10, a_val=None):
+    def __init__(self, _q_type, thread_num=10, a_val=None):
         # parent construct
         MyThread.__init__(self, thread_num)
 
         # thread lock
-        self.mutex = threading.Lock()
+        self.mutex          = threading.Lock()
+
+        self.worker_type    = Config.JHS_Brand
+
+        # message
+        self.message        = Message()
 
         # db
-        self.mysqlAccess = MysqlAccess() # mysql access
-        self.mongofsAccess = MongofsAccess() # mongodb fs access
+        self.mysqlAccess    = MysqlAccess() # mysql access
+        self.redisAccess    = RedisAccess()     # redis db
+        self.mongofsAccess  = MongofsAccess() # mongodb fs access
 
         # jhs queue type
-        self.jhs_type = jhs_type # 1 or main:新增商品, day:每天一次的商品, hour:每小时一次的商品
+        self._q_type        = _q_type # main:新增商品, day:每天一次的商品, hour:每小时一次的商品, update:更新
 
         # appendix val
-        self.a_val = a_val
+        self.a_val          = a_val
         
         # activity items
-        self.items = []
+        self.items          = []
 
         # dial client
-        self.dial_client = DialClient()
+        self.dial_client    = DialClient()
 
         # local ip
-        self._ip = Common.local_ip()
+        self._ip            = Common.local_ip()
 
         # router tag
-        self._tag = 'ikuai'
-        #self._tag = 'tpent'
+        self._tag           = 'ikuai'
+        #self._tag          = 'tpent'
 
         # give up item, retry too many times
-        self.giveup_items = []
+        self.giveup_items   = []
 
     # To dial router
     def dialRouter(self, _type, _obj):
@@ -74,6 +82,21 @@ class JHSItemM(MyThread):
 
     def putItems(self, _items):
         for _item in _items: self.put_q((0, _item))
+
+    # To merge item
+    def mergeAct(self, item, prev_item):
+        if prev_item:
+            pass
+
+    # To put item redis db
+    def putActDB(self, item):
+        # redis
+        keys = [self.worker_type, str(item.item_juId)]
+        #prev_item = self.redisAccess.read_jhsitem(keys)
+        #self.mergeAct(item, prev_item)
+        val = item.outTupleForRedis()
+        msg = self.message.jhsitemMsg(val)
+        self.redisAccess.write_jhsitem(keys, msg)
 
     # To crawl retry
     def crawlRetry(self, _data):
@@ -128,23 +151,13 @@ class JHSItemM(MyThread):
             return True
         return False
 
-    # update item remind
-    def updateItemRemind(self, itemsql_list, f=False):
-        if f or len(itemsql_list) >= Config.item_max_arg:
-            if len(itemsql_list) > 0:
-                self.mysqlAccess.updateJhsItemRemind(itemsql_list)
-                #print '# update remind data to database'
-            return True
-        return False
-
     # To crawl item
     def crawl(self):
         # item sql list
         _iteminfosql_list = []
         _itemdaysql_list = []
         _itemhoursql_list = []
-        _itemremindsql_list = []
-        #_itemupdatesql_list = []
+        _itemupdatesql_list = []
         while True:
             _data = None
             try:
@@ -170,102 +183,84 @@ class JHSItemM(MyThread):
                     #self.updateItems(_itemupdatesql_list, True)
                     #_itemupdatesql_list = []
 
-                    # remind
-                    #self.updateItemRemind(_itemremindsql_list, True)
-                    #_itemremindsql_list = []
-
                     break
 
                 item = None
-                crawl_type = ''
-                if self.jhs_type == 1 or self.jhs_type == 'main':
-                    # 商品实例
+                if self._q_type == 'main':
+                    # 新商品实例
                     item = JHSItem()
                     _val = _data[1]
+                    if self.a_val: _val = _val + self.a_val
                     item.antPage(_val)
-                    #print '# To crawl activity item val : ', Common.now_s(), _val[2], _val[4], _val[6]
-                    crawl_type = 'main'
-
+                    #print '# To crawl activity item val : ', Common.now_s()
                     # 汇聚
-                    iteminfoSql = item.outTuple()
                     self.push_back(self.items, item.outTuple())
 
                     # 入库
+                    iteminfoSql = item.outTuple()
                     _iteminfosql_list.append(iteminfoSql)
                     if self.insertIteminfo(_iteminfosql_list): _iteminfosql_list = []
-                elif self.jhs_type == 'day':
-                    # 每天一次商品实例
+
+                    self.putActDB(item)
+                elif self._q_type == 'day':
+                    # 每天商品实例
                     item = JHSItem()
                     _val = _data[1]
                     if self.a_val: _val = _val + self.a_val
-
                     item.antPageDay(_val)
-                    #print '# Day To crawl activity item val : ', Common.now_s(), _val[0], _val[4], _val[5]
-                    crawl_type = 'day'
+                    #print '# Day To crawl activity item val : ', Common.now_s()
                     # 汇聚
                     self.push_back(self.items, item.outTupleDay())
 
-                    #daysql = item.outTupleDay()
-                    daySql,lockSql = item.outTupleDay()
-                    if lockSql:
-                        self.updateItemLockStartEndtime(lockSql)
+                    # 入库
+                    updateSql = item.outSqlForUpdate()
+                    if updateSql:
+                        self.mysqlAccess.updateJhsItem(updateSql)
+
+                    daySql = item.outSqlForDay()
                     _itemdaysql_list.append(daySql)
                     if self.insertItemday(_itemdaysql_list): _itemdaysql_list = []
-
-                    #remindSql = item.outTupleUpdateRemind()
-                    #if remindSql:
-                    #    _itemremindsql_list.append(remindSql)
-                    #if self.updateItemRemind(_itemremindsql_list): _itemremindsql_list = []
-                elif self.jhs_type == 'hour':
-                    # 每小时一次商品实例
+                elif self._q_type == 'hour':
+                    # 每小时商品实例
                     item = JHSItem()
                     _val = _data[1]
                     if self.a_val: _val = _val + self.a_val
-
                     item.antPageHour(_val)
-                    #print '# Hour To crawl activity item val : ', Common.now_s(), _val[0], _val[4], _val[5]
-                    crawl_type = 'hour'
+                    #print '# Hour To crawl activity item val : ', Common.now_s()
                     # 汇聚
                     self.push_back(self.items, item.outTupleHour())
 
-                    hourSql,lockSql = item.outTupleHour()
-                    if lockSql:
-                        self.updateItemLockStartEndtime(lockSql)
+                    # 入库
+                    updateSql = item.outSqlForUpdate()
+                    if updateSql:
+                        self.mysqlAccess.updateJhsItem(updateSql)
 
+                    hourSql = item.outSqlForHour()
                     _itemhoursql_list.append(hourSql)
                     if self.insertItemhour(_itemhoursql_list): _itemhoursql_list = []
 
-                    #remindSql = item.outTupleUpdateRemind()
-                    #if remindSql:
-                    #    _itemremindsql_list.append(remindSql)
-                    #if self.updateItemRemind(_itemremindsql_list): _itemremindsql_list = []
-
-                elif self.jhs_type == 'update':
+                elif self._q_type == 'update':
                     # 更新商品
                     item = JHSItem()
                     _val = _data[1]
                     if self.a_val: _val = _val + self.a_val
 
                     item.antPageUpdate(_val)
-                    crawl_type = 'update'
                     # 汇聚
                     self.push_back(self.items, item.outSqlForUpdate())
 
                     updateSql = item.outSqlForUpdate()
                     if updateSql:
-                        self.mysqlAccess.updateJhsItems([updateSql])
-                    #if updateSql:
-                    #    _itemupdatesql_list.append(updateSql)
-                    #if self.updateItems(_itemupdatesql_list): _itemupdatesql_list = []
+                        self.mysqlAccess.updateJhsItem(updateSql)
 
                 # 存网页
-                #if item and crawl_type != '':
-                #    _pages = item.outItemPage(crawl_type)
+                #if item:
+                #    _pages = item.outItemPage(self._q_type)
                 #    self.mongofsAccess.insertJHSPages(_pages)
 
 
                 # 延时
-                time.sleep(0.1)
+                time.sleep(1)
                 # 通知queue, task结束
                 self.queue.task_done()
 
@@ -287,7 +282,6 @@ class JHSItemM(MyThread):
 
             except Exception as e:
                 print 'Unknown exception crawl item :', e
-                #traceback.print_exc()
                 Common.traceback_log()
                 self.crawlRetry(_data)
                 # 通知queue, task结束

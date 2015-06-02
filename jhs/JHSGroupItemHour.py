@@ -27,7 +27,7 @@ class JHSGroupItemHour():
         self.item_type = "groupitem"
 
         # item queue
-        self.item_queue = JHSItemQ(self.item_type)
+        #self.item_queue = JHSItemQ(self.item_type)
 
         # 分布式主机标志
         self.m_type = m_type

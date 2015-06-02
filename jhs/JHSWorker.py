@@ -79,17 +79,18 @@ class JHSWorker():
         if not msg: return
         msg['retry'] += 1
         _retry = msg['retry']
-        max_time = 10
-        if self._obj == 'cat':
+        _obj = msg["obj"]
+        max_time = Config.crawl_retry
+        if _obj == 'cat':
             max_time = Config.json_crawl_retry
-        elif self._obj == 'act':
+        elif _obj == 'act':
             max_time = Config.act_crawl_retry
-        elif self._obj == 'item':
+        elif _obj == 'item':
             max_time = Config.item_crawl_retry
         if _retry < max_time:
             self.redisQueue.put_q(_key, msg)
         else:
-            self.push_back(self.giveup_items, msg)
+            #self.push_back(self.giveup_items, msg)
             print "# retry too many time, no get:", msg
 
      # To crawl page
@@ -122,12 +123,11 @@ class JHSWorker():
             time.sleep(random.uniform(10,30))
         except Exception as e:
             print '# exception err:',e
-            if str(e).find('Read timed out') != -1:
-                self.crawlRetry(_key,msg)
-            elif str(e).find('Name or service not known') != -1:
-                self.crawlRetry(_key,msg)
+            self.crawlRetry(_key,msg)
             time.sleep(random.uniform(10,30))
+            Common.traceback_log()
 
+    # CAT queue
     def run_cat(self, msg, _val):
         bResult_list = []
         c_url  = msg["url"]
@@ -147,15 +147,18 @@ class JHSWorker():
             else:
                 print '# err: not get brandjson parse val list.'
 
+    # ACT queue
     def run_act(self, msg):
+        # 默认数据
+        msg_val = msg["val"]
         print '# act start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         act_obj = None
         if self._crawl_type == 'main':
             act_obj = JHSBActItem()
-            act_obj.antPageMain(msg)
+            act_obj.antPageMain(msg_val)
         elif self._crawl_type == 'check':
             act_obj = JHSBActItem()
-            act_obj.antPageCheck(msg)
+            act_obj.antPageCheck(msg_val)
         print '# act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
         act_keys = [self.worker_type, str(act_obj.brandact_id)]
@@ -163,7 +166,6 @@ class JHSWorker():
 
         # 是否需要抓取商品
         if act_obj.crawling_confirm != 2:
-        #if True:
             # 只取非俪人购商品
             if act_obj and int(act_obj.brandact_sign) != 3:
                 # 多线程抓商品
@@ -175,6 +177,8 @@ class JHSWorker():
             # 处理活动信息
             self.procAct(act_obj, prev_act)
             print '# pro act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            
+            #act_obj.crawling_confirm == 0: update item position
         else:
            print '# Already start activity, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name) 
 
@@ -209,9 +213,9 @@ class JHSWorker():
         print '# Activity Items crawler start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), act.brandact_id, act.brandact_name
         # 多线程 控制并发的线程数
         if len(item_val_list) > Config.item_max_th:
-            m_itemsObj = JHSItemM(1, Config.item_max_th)
+            m_itemsObj = JHSItemM(self._crawl_type, Config.item_max_th)
         else: 
-            m_itemsObj = JHSItemM(1, len(item_val_list))
+            m_itemsObj = JHSItemM(self._crawl_type, len(item_val_list))
         m_itemsObj.createthread()
         m_itemsObj.putItems(item_val_list)
         m_itemsObj.run()
@@ -251,18 +255,6 @@ class JHSWorker():
             if not act.brandact_other_ids or act.brandact_other_ids == '':
                 act.brandact_other_ids = prev_act["_act_ids"]
 
-    # 删除redis数据库过期活动
-    def delAct(self, _acts):
-        for _act in _acts:
-            keys = [self.worker_type, str(_act["act_id"])]
-
-            item = self.redisAccess.read_jhsact(keys)
-            if item:
-                end_time = item["end_time"]
-                now_time = Common.time_s(self.crawling_time)
-                # 删除过期的商品
-                if now_time > end_time: self.redisAccess.delete_jhsact(keys)
-
     # To put act db
     def putActDB(self, act, prev_act):
         # redis
@@ -292,9 +284,11 @@ class JHSWorker():
         # 将抓取的活动信息存入redis
         self.putActDB(act, prev_act)
 
-    # 
+    # ITEM queue
     def run_item(self, msg, _val):
-        brandact_id, brandact_name, item_val_list = msg
+        # 默认数据
+        msg_val = msg["val"]
+        brandact_id, brandact_name, item_val_list = msg_val
         print '# Activity Items start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), brandact_id, brandact_name
         # 多线程 控制并发的线程数
         max_th = Config.item_max_th
@@ -337,6 +331,18 @@ class JHSWorker():
                 self.crawlPage(_obj, _crawl_type, _key, _msg, _val)
             except Exception as e:
                 print '# exception err in process of JHSWorker:',e,_key,_msg
+
+    # 删除redis数据库过期活动
+    def delAct(self, _acts):
+        for _act in _acts:
+            keys = [self.worker_type, str(_act["act_id"])]
+
+            item = self.redisAccess.read_jhsact(keys)
+            if item:
+                end_time = item["end_time"]
+                now_time = Common.time_s(self.crawling_time)
+                # 删除过期的商品
+                if now_time > end_time: self.redisAccess.delete_jhsact(keys)
 
     # 查找结束的活动
     def scanEndActs(self, val):
@@ -384,11 +390,11 @@ class JHSWorker():
             #print msg
             keys = [self.worker_type, str(_item[0])]
             #print keys
-            #if self.redisAccess.exist_jhsitem(keys):
+            if self.redisAccess.exist_jhsitem(keys):
                 #print self.redisAccess.read_jhsitem(keys)
-                #self.redisAccess.delete_jhsitem(keys)
-            #self.redisAccess.write_jhsitem(keys, msg)
-            #i += 1 
+                self.redisAccess.delete_jhsitem(keys)
+            self.redisAccess.write_jhsitem(keys, msg)
+            i += 1 
             #break
         print '# redis items num:',i
         

@@ -61,6 +61,15 @@ class MysqlAccess():
         except Exception, e:
             print '# update Jhs Item lock start-end time exception:', e
 
+
+    # 更新商品信息
+    def updateJhsItem(self, args):
+        try:
+            sql = 'call sp_update_jhs_item(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+            self.jhs_db.execute(sql, args)
+        except Exception, e:
+            print '# update Jhs Item exception:', e
+
     # 更新商品信息
     def updateJhsItems(self, args_list):
         try:
