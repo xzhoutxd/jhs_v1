@@ -739,8 +739,7 @@ class JHSBActItem():
                 self.brandPage()
                 # 活动优惠
                 self.brandActConpons()
-                #if str(self.brandact_id) not in brandid_list or self.beginH_gap > time_gap:
-                if True:
+                if str(self.brandact_id) not in brandid_list or self.beginH_gap > time_gap:
                     # 活动页面商品
                     self.brandActItems()
                     if self.beginH_gap > time_gap:
