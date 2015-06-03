@@ -53,10 +53,10 @@ class MysqlPool:
 
 # mysql database pool
 mysql_config = {
-    #'jhs' : {'host':'192.168.1.113', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
+    'jhs' : {'host':'192.168.1.113', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
     #'jhs' : {'host':'127.0.0.1', 'user':'root', 'passwd':'zhouxin',  'db':'jhs'},
     # test
-    'jhs' : {'host':'127.0.0.1', 'user':'root', 'passwd':'zhouxin',  'db':'jhs_test'},
+    #'jhs' : {'host':'127.0.0.1', 'user':'root', 'passwd':'zhouxin',  'db':'jhs_test'},
     #'jhs' : {'host':'192.168.1.112', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
 }
 
