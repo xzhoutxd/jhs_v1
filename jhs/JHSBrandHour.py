@@ -77,7 +77,7 @@ class JHSBrandHour():
             print '# not find need hour items...'
             
         print '# hour all item nums:',all_item_num
-        print '# need update all acts nums:',len(hour_val_list)
+        print '# hour all acts nums:',len(hour_val_list)
         # 清空每小时抓取redis队列
         self.item_queue.clearItemQ()
         # 保存每小时抓取redis队列

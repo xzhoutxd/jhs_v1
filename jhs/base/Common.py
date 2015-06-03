@@ -289,8 +289,8 @@ def fix_url(url):
 # local ip
 import socket
 def local_ip():
-    #host = socket.gethostname()
-    #ip = socket.gethostbyname(host)
-    #return ip
-    return '192.168.1.35'
+    host = socket.gethostname()
+    ip = socket.gethostbyname(host)
+    return ip
+    #return '192.168.1.35'
  

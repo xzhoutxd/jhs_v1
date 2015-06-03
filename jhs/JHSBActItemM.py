@@ -16,7 +16,6 @@ from Queue import Empty
 from db.MysqlAccess import MysqlAccess
 from JHSBActItem import JHSBActItem
 sys.path.append('../db')
-from MongoAccess import MongoAccess
 from MongofsAccess import MongofsAccess
 
 import warnings
@@ -33,7 +32,6 @@ class JHSBActItemM(MyThread):
 
         # db
         self.mysqlAccess = MysqlAccess() # mysql access
-        #self.mongoAccess = MongoAccess() # mongodb access
         self.mongofsAccess = MongofsAccess() # mongodb fs access
 
         # appendix val
@@ -205,7 +203,7 @@ class JHSBActItemM(MyThread):
                     crawl_type = 'parser'
 
                     # 汇聚
-                    self.push_back(self.items, item.outTupleBrand())
+                    self.push_back(self.items, item.outTupleParse())
                 else:
                     self.queue.task_done()
                     continue
@@ -213,7 +211,6 @@ class JHSBActItemM(MyThread):
                 # 存网页
                 #if item and crawl_type != '':
                 #    _pages = item.outItemPage(crawl_type)
-                ##    self.mongoAccess.insertJHSPages(_pages)
                 #    self.mongofsAccess.insertJHSPages(_pages)
 
                     

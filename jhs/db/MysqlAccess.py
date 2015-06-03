@@ -48,19 +48,10 @@ class MysqlAccess():
     # 更新商品位置信息
     def updateJhsItemPosition(self, args_list):
         try:
-            sql = 'call sp_update_item_position(%s,%s,%s,%s,%s)'
+            sql = 'call sp_update_item_position(%s,%s,%s)'
             self.jhs_db.executemany(sql, args_list)
         except Exception, e:
             print '# update Jhs Item position exception:', e
-
-    # 更新商品信息
-    def updateJhsItemLockStartEndtime(self, args):
-        try:
-            sql = 'call sp_update_jhs_item_lock_startendtime(%s,%s,%s,%s,%s)'
-            self.jhs_db.execute(sql, args)
-        except Exception, e:
-            print '# update Jhs Item lock start-end time exception:', e
-
 
     # 更新商品信息
     def updateJhsItem(self, args):
@@ -119,7 +110,15 @@ class MysqlAccess():
         except Exception, e:
             print '# execute Sql exception:', e
 
-    # 还没有开团的活动
+    # 结束的商品
+    def selectJhsItemEnd(self, args):
+        try:
+            sql = 'select item_juid from nd_jhs_parser_item_info where start_time > %s and end_time < %s'
+            return self.jhs_db.select(sql, args)
+        except Exception, e:
+            print '# select Jhs not end item exception:', e
+
+    # 没有开团的活动
     def selectJhsActNotStart(self, args):
         # 非俪人购
         try:
@@ -128,14 +127,16 @@ class MysqlAccess():
         except Exception, e:
             print '# select Jhs not start act exception:', e
 
+    # 结束的活动
     def selectJhsActEnd(self, args):
         # 非俪人购
         try:
-            sql = 'select * from nd_jhs_parser_activity where end_time < %s and act_sign != 3'
+            sql = 'select act_id from nd_jhs_parser_activity where start_time > %s and end_time < %s and act_sign != 3'
             return self.jhs_db.select(sql, args)
         except Exception, e:
-            print '# select Jhs alive act exception:', e
+            print '# select Jhs not end act exception:', e
 
+    # 没有结束的活动
     def selectJhsActNotEnd(self, args):
         # 非俪人购
         try:
@@ -144,7 +145,7 @@ class MysqlAccess():
         except Exception, e:
             print '# select Jhs alive act exception:', e
 
-    # 查找还没有结束的活动
+    # 查找开团中活动
     def selectJhsActAlive(self, args):
         # 非俪人购
         try:

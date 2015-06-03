@@ -24,7 +24,7 @@ class JHSBActItem():
         self.crawling_begintime = '' # 本次抓取开始时间
         self.crawling_beginDate = '' # 本次爬取日期
         self.crawling_beginHour = '' # 本次爬取小时
-        self.crawling_confirm = 1 # 本活动是否需要爬取 1:没有开团需要抓取 2:已经开团 0:只需要更新信息
+        self.crawling_confirm = 1 # 本活动是否需要爬取 1:没有开团需要抓取 2:已经开团 0:只需要更新商品位置
         self.beginH_gap = 1 # 定义新品牌团时间段(小时)
 
         # 类别
@@ -718,8 +718,12 @@ class JHSBActItem():
         else:
             r_val = val + (self.crawling_begintime,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000))
         self.brandact_itemVal_list.append(r_val)
-        self.brandact_itemids.append(str(r_val[7]))
-        self.brandact_itemids.append(str(r_val[6]))
+        # item juid
+        if str(r_val[7]) != '':
+            self.brandact_itemids.append(str(r_val[7]))
+        # item id
+        if str(r_val[6]) != '':
+            self.brandact_itemids.append(str(r_val[6]))
 
     # 品牌团信息和其中商品基本信息
     def antPageMain(self, val):
@@ -735,9 +739,13 @@ class JHSBActItem():
                 self.brandPage()
                 # 活动优惠
                 self.brandActConpons()
-                if str(self.brandact_id) not in brandid_list:
+                #if str(self.brandact_id) not in brandid_list or self.beginH_gap > time_gap:
+                if True:
                     # 活动页面商品
                     self.brandActItems()
+                    if self.beginH_gap > time_gap:
+                        self.crawling_confirm = 0
+                        
         else:
             self.crawling_confirm = 2
 
@@ -855,11 +863,11 @@ class JHSBActItem():
     def outTupleForComing(self):
         return (self.crawling_confirm,self.outSqlForComing())
 
-    def outTupleBrand(self):
+    def outTupleParse(self):
         return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,str(self.brandact_position),str(self.brandact_catgoryId),self.brandact_catgoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate))
 
     def outTupleForRedis(self):
-        return (self.crawling_time_s,str(self.brandact_catgoryId),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_sign),self.brandact_other_ids,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_itemids)
+        return (Common.time_s(self.crawling_time),str(self.brandact_catgoryId),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_sign),self.brandact_other_ids,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_itemids)
 
 if __name__ == '__main__':
     pass

@@ -29,7 +29,8 @@ class testItem():
         #item.brandact_url = 'http://act.ju.taobao.com/market/ju/beibeipake0406.php'
         #item.brandact_url = 'http://act.ju.taobao.com/market/ju/pegperego0408.php'
         #item.brandact_url = 'http://ju.taobao.com/jusp/nv/hjsh/tp.htm'
-        item.brandact_url = 'http://ju.taobao.com/jusp/nv/rllm/tp.htm?spm=0.0.0.0.YwqFjU'
+        #item.brandact_url = 'http://ju.taobao.com/jusp/nv/rllm/tp.htm?spm=0.0.0.0.YwqFjU'
+        item.brandact_url = 'http://ju.taobao.com/tg/brand_items.htm?act_sign_id=6979575'
         # 品牌团页面html
         item.brandPage()
 

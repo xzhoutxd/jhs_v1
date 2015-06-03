@@ -165,22 +165,33 @@ class JHSWorker():
         prev_act = self.redisAccess.read_jhsact(act_keys)
 
         # 是否需要抓取商品
-        if act_obj.crawling_confirm != 2:
+        if act_obj and act_obj.crawling_confirm != 2:
+            items_list = []
             # 只取非俪人购商品
-            if act_obj and int(act_obj.brandact_sign) != 3:
+            if int(act_obj.brandact_sign) != 3:
+                if act_obj.crawling_confirm == 0:
+                    #更新马上开团活动中商品位置
+                    self.update_actItems_position(act_obj)
                 # 多线程抓商品
-                self.run_actItems(act_obj, prev_act)
+                items_list = self.run_actItems(act_obj, prev_act)
             else:
                 print '# ladygo activity id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
 
             print '# pro act start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # 处理活动信息
-            self.procAct(act_obj, prev_act)
+            self.procAct(act_obj, prev_act, items_list)
             print '# pro act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            
-            #act_obj.crawling_confirm == 0: update item position
         else:
            print '# Already start activity, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name) 
+
+    #更新马上开团活动中商品位置
+    def update_actItems_position(self, act):
+        update_val_list = []
+        act_id = act.brandact_id
+        for item in act.brandact_itemVal_list:
+            if str(item[7]) != '':
+                update_val_list.append((str(item[7]),str(act_id),item[4]))
+        self.mysqlAccess.updateJhsItemPosition(update_val_list)
 
     # 并行获取品牌团商品
     def run_actItems(self, act, prev_act):
@@ -189,6 +200,10 @@ class JHSWorker():
         item_val_list = []
         # 过滤已经抓取过的商品ID列表
         item_ids = act.brandact_itemids
+        if str(act.brandact_id) == '6979575':
+            #print item_ids
+            print '# itemids num:',len(item_ids)
+            print '# item vals num:',len(act.brandact_itemVal_list)
         if prev_act:
             prev_item_ids = prev_act["item_ids"]
             item_ids      = Common.diffSet(item_ids, prev_item_ids)
@@ -213,9 +228,9 @@ class JHSWorker():
         print '# Activity Items crawler start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), act.brandact_id, act.brandact_name
         # 多线程 控制并发的线程数
         if len(item_val_list) > Config.item_max_th:
-            m_itemsObj = JHSItemM(self._crawl_type, Config.item_max_th)
+            m_itemsObj = JHSItemM('main', Config.item_max_th)
         else: 
-            m_itemsObj = JHSItemM(self._crawl_type, len(item_val_list))
+            m_itemsObj = JHSItemM('main', len(item_val_list))
         m_itemsObj.createthread()
         m_itemsObj.putItems(item_val_list)
         m_itemsObj.run()
@@ -224,6 +239,7 @@ class JHSWorker():
         print '# Activity find new Items num:', len(item_val_list)
         print '# Activity crawl Items num:', len(item_list)
         print '# Activity Items end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), act.brandact_id, act.brandact_name
+        return item_list
 
     # To merge activity
     def mergeAct(self, act, prev_act):
@@ -233,7 +249,7 @@ class JHSWorker():
             act.brandact_itemids   = Common.unionSet(act.brandact_itemids, prev_item_ids)
 
             # 取第一次的活动抓取时间
-            act.crawling_time_s = prev_act["crawl_time"]
+            act.crawling_time = Common.str2timestamp(prev_act["crawl_time"])
 
             if not act.brandact_name or act.brandact_name == '':
                 act.brandact_name = prev_act["act_name"]
@@ -280,7 +296,17 @@ class JHSWorker():
         #self.mongofsAccess.insertJHSPages(_pages)
 
     # To process activity
-    def procAct(self, act, prev_act):
+    def procAct(self, act, prev_act, items_list):
+        # 活动抓取的item ids
+        act.brandact_itemids = []
+        if items_list:
+            for item in items_list:
+                # item juid
+                if str(item[1]) != '':
+                    act.brandact_itemids.append(str(item[1]))
+                # item id
+                if str(item[10]) != '':
+                    act.brandact_itemids.append(str(item[10]))
         # 将抓取的活动信息存入redis
         self.putActDB(act, prev_act)
 
@@ -334,42 +360,64 @@ class JHSWorker():
 
     # 删除redis数据库过期活动
     def delAct(self, _acts):
+        i = 0
         for _act in _acts:
-            keys = [self.worker_type, str(_act["act_id"])]
+            keys = [self.worker_type, str(_act[0])]
 
             item = self.redisAccess.read_jhsact(keys)
             if item:
                 end_time = item["end_time"]
                 now_time = Common.time_s(self.crawling_time)
+                # 删除过期的活动
+                if now_time > end_time: 
+                    i += 1
+                    self.redisAccess.delete_jhsact(keys)
+        print '# delete acts num:',i
+
+    def delItem(self, _items):
+        i = 0
+        for _item in _items:
+            keys = [self.worker_type, str(_item[0])]
+
+            item = self.redisAccess.read_jhsitem(keys)
+            if item:
+                end_time = item["end_time"]
+                now_time = Common.time_s(self.crawling_time)
                 # 删除过期的商品
-                if now_time > end_time: self.redisAccess.delete_jhsact(keys)
+                if now_time > end_time: 
+                    i += 1
+                    self.redisAccess.delete_jhsitem(keys)
+        print '# delete items num:',i
 
     # 查找结束的活动
     def scanEndActs(self, val):
         _acts = self.mysqlAccess.selectJhsActEnd(val)
-        end_acts = []
-        for _act in _acts:
-            act_id = _act[1]
-            end_acts.append({"act_id":str(act_id)})
+        print '# end acts num:',len(_acts)
         # 删除已经结束的活动
-        self.delAct(end_acts)
-        return _acts
+        self.delAct(_acts)
+
+    # 查找结束的商品
+    def scanEndItems(self, val):
+        _items = self.mysqlAccess.selectJhsItemEnd(val)
+        print '# end items num:',len(_items)
+        # 删除已经结束的商品
+        self.delItem(_items)
 
     # acts redis
     def actsRedis(self):
-        i = 0
         _acts = self.mysqlAccess.selectActsRedisdata()
         print '# acts num:',len(_acts)
-        for _act in _acts:
-            act_id = _act[2]
-            _itemids = self.mysqlAccess.selectItemsids(str(act_id))
-            item_ids = []
-            for _itemid in _itemids:
-                item_ids.append(str(_itemid[0]))
-                item_ids.append(str(_itemid[1]))
-            act_val = _act + (item_ids,)
+        i = 0
+        #for _act in _acts:
+            #act_id = _act[2]
+            #_itemids = self.mysqlAccess.selectItemsids(str(act_id))
+            #item_ids = []
+            #for _itemid in _itemids:
+            #    item_ids.append(str(_itemid[0]))
+            #    item_ids.append(str(_itemid[1]))
+            #act_val = _act + (item_ids,)
             #print act_val
-            keys = [self.worker_type, str(act_id)]
+            #keys = [self.worker_type, str(act_id)]
             #print keys
             #if self.redisAccess.exist_jhsact(keys):
                 #i += 1
@@ -385,23 +433,32 @@ class JHSWorker():
         _items = self.mysqlAccess.selectItemRedisdata()
         print '# items num:', len(_items)
         i = 0
-        for _item in _items:
-            msg = self.message.jhsitemMsg(_item)
+        #for _item in _items:
+            #msg = self.message.jhsitemMsg(_item)
             #print msg
-            keys = [self.worker_type, str(_item[0])]
+            #keys = [self.worker_type, str(_item[0])]
             #print keys
-            if self.redisAccess.exist_jhsitem(keys):
+            #if self.redisAccess.exist_jhsitem(keys):
                 #print self.redisAccess.read_jhsitem(keys)
-                self.redisAccess.delete_jhsitem(keys)
-            self.redisAccess.write_jhsitem(keys, msg)
-            i += 1 
+                #self.redisAccess.delete_jhsitem(keys)
+            #self.redisAccess.write_jhsitem(keys, msg)
+            #i += 1 
             #break
         print '# redis items num:',i
-        
-            
 
 if __name__ == '__main__':
-    w = JHSWorker()
+    pass
+    #w = JHSWorker()
+    # delete end acts
+    #w.scanEndActs(('2015-06-01',Common.time_s(w.crawling_time)))
+    # delete end items
+    #w.scanEndItems(('2015-06-01',Common.time_s(w.crawling_time)))
+    # put acts in redis 
     #w.actsRedis()
-    w.itemsRedis()
+    # put items in redis 
+    #w.itemsRedis()
+    #act_id = 6979575
+    #keys = [w.worker_type, str(act_id)]
+    #if w.redisAccess.exist_jhsact(keys):
+    #    print w.redisAccess.read_jhsact(keys)
 

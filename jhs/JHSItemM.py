@@ -86,14 +86,45 @@ class JHSItemM(MyThread):
     # To merge item
     def mergeAct(self, item, prev_item):
         if prev_item:
-            pass
+            if not item.item_position or item.item_position == 0:
+                item.item_position      = prev_item["item_position"]
+            if not item.item_juName or item.item_juName == '':
+                item.item_juName        = prev_item["item_juname"]
+            if not item.item_juDesc or item.item_juDesc == '':
+                item.item_juDesc        = prev_item["item_judesc"]
+            if not item.item_juPic_url or item.item_juPic_url == '':
+                item.item_juPic_url     = prev_item["item_jupic_url"]
+            if not item.item_url or item.item_url == '':
+                item.item_url           = prev_item["item_url"]
+            if not item.item_oriPrice or item.item_oriPrice == '':
+                item.item_oriPrice      = prev_item["item_oriprice"]
+            if not item.item_actPrice or item.item_actPrice == '':
+                item.item_actPrice      = prev_item["item_actprice"]
+            if not item.item_discount or item.item_discount == '':
+                item.item_discount      = prev_item["item_discount"]
+            if not item.item_coupons or item.item_coupons == []:
+                item.item_coupons       = prev_item["item_coupons"].split(Config.sep)
+            if not item.item_promotions or item.item_promotions == []:
+                item.item_promotions    = prev_item["item_promotions"].split(Config.sep)
+            if not item.item_remindNum or item.item_remindNum == '':
+                item.item_remindNum     = prev_item["item_remindnum"]
+            if not item.item_isLock_time or item.item_isLock_time == '':
+                if prev_item["item_islock_time"] and prev_item["item_islock_time"] != '':
+                    item.item_isLock_time   = Common.str2timestamp(prev_item["item_islock_time"])
+                    item.item_isLock        = prev_item["item_islock"]
+            if not item.item_starttime or item.item_starttime == 0.0:
+                if prev_item["start_time"] and prev_item["start_time"] != '':
+                    item.item_starttime     = Common.str2timestamp(prev_item["start_time"])
+            if not item.item_endtime or item.item_endtime == 0.0:
+                if prev_item["end_time"] and prev_item["end_time"] != '':
+                    item.item_endtime       = Common.str2timestamp(prev_item["end_time"])
 
     # To put item redis db
     def putActDB(self, item):
         # redis
         keys = [self.worker_type, str(item.item_juId)]
-        #prev_item = self.redisAccess.read_jhsitem(keys)
-        #self.mergeAct(item, prev_item)
+        prev_item = self.redisAccess.read_jhsitem(keys)
+        self.mergeAct(item, prev_item)
         val = item.outTupleForRedis()
         msg = self.message.jhsitemMsg(val)
         self.redisAccess.write_jhsitem(keys, msg)
@@ -194,14 +225,13 @@ class JHSItemM(MyThread):
                     item.antPage(_val)
                     #print '# To crawl activity item val : ', Common.now_s()
                     # 汇聚
+                    # redis
+                    self.putActDB(item)
                     self.push_back(self.items, item.outTuple())
-
                     # 入库
                     iteminfoSql = item.outTuple()
                     _iteminfosql_list.append(iteminfoSql)
                     if self.insertIteminfo(_iteminfosql_list): _iteminfosql_list = []
-
-                    self.putActDB(item)
                 elif self._q_type == 'day':
                     # 每天商品实例
                     item = JHSItem()
@@ -210,8 +240,9 @@ class JHSItemM(MyThread):
                     item.antPageDay(_val)
                     #print '# Day To crawl activity item val : ', Common.now_s()
                     # 汇聚
+                    # redis
+                    self.putActDB(item)
                     self.push_back(self.items, item.outTupleDay())
-
                     # 入库
                     updateSql = item.outSqlForUpdate()
                     if updateSql:
@@ -228,8 +259,9 @@ class JHSItemM(MyThread):
                     item.antPageHour(_val)
                     #print '# Hour To crawl activity item val : ', Common.now_s()
                     # 汇聚
+                    # redis
+                    self.putActDB(item)
                     self.push_back(self.items, item.outTupleHour())
-
                     # 入库
                     updateSql = item.outSqlForUpdate()
                     if updateSql:
@@ -238,7 +270,6 @@ class JHSItemM(MyThread):
                     hourSql = item.outSqlForHour()
                     _itemhoursql_list.append(hourSql)
                     if self.insertItemhour(_itemhoursql_list): _itemhoursql_list = []
-
                 elif self._q_type == 'update':
                     # 更新商品
                     item = JHSItem()
@@ -247,6 +278,8 @@ class JHSItemM(MyThread):
 
                     item.antPageUpdate(_val)
                     # 汇聚
+                    # redis
+                    self.putActDB(item)
                     self.push_back(self.items, item.outSqlForUpdate())
 
                     updateSql = item.outSqlForUpdate()
@@ -257,7 +290,6 @@ class JHSItemM(MyThread):
                 #if item:
                 #    _pages = item.outItemPage(self._q_type)
                 #    self.mongofsAccess.insertJHSPages(_pages)
-
 
                 # 延时
                 time.sleep(1)
