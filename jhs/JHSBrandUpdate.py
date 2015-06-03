@@ -32,7 +32,7 @@ class JHSBrandUpdate():
         self.begin_time = Common.now()
 
         # 即将开团的最小时间
-        self.min_hourslot = 20 # 最小时间段
+        self.min_hourslot = 1 # 最小时间段
 
         # 分布式主机标志
         self.m_type = m_type
