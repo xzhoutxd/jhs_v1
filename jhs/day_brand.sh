@@ -21,7 +21,7 @@ cd $DIR
 /usr/local/bin/python $DIR/JHSBrandDay.py $m_type > $LOGFILE
 
 # process queue
-p_num=4
+p_num=3
 obj='item'
 crawl_type='day'
 DIR=`pwd`

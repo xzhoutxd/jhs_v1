@@ -200,10 +200,6 @@ class JHSWorker():
         item_val_list = []
         # 过滤已经抓取过的商品ID列表
         item_ids = act.brandact_itemids
-        if str(act.brandact_id) == '6979575':
-            #print item_ids
-            print '# itemids num:',len(item_ids)
-            print '# item vals num:',len(act.brandact_itemVal_list)
         if prev_act:
             prev_item_ids = prev_act["item_ids"]
             item_ids      = Common.diffSet(item_ids, prev_item_ids)
@@ -273,6 +269,10 @@ class JHSWorker():
 
     # To put act db
     def putActDB(self, act, prev_act):
+        # 预热信息
+        if self._crawl_type == 'main':
+            self.mysqlAccess.insertJhsActComing(act.outSqlForComing()) 
+
         # redis
         self.mergeAct(act, prev_act)
         keys = [self.worker_type, str(act.brandact_id)]
@@ -287,13 +287,11 @@ class JHSWorker():
             else:
                 print '# insert activity, id:%s name:%s'%(act.brandact_id, act.brandact_name)
                 self.mysqlAccess.insertJhsAct(act.outSql())
-            # 预热信息
-            self.mysqlAccess.insertJhsActComing(act.outSqlForComing())
 
         # mongo
         # 存网页
-        #_pages = act.outItemPage(self._crawl_type)
-        #self.mongofsAccess.insertJHSPages(_pages)
+        _pages = act.outItemPage(self._crawl_type)
+        self.mongofsAccess.insertJHSPages(_pages)
 
     # To process activity
     def procAct(self, act, prev_act, items_list):
@@ -334,7 +332,7 @@ class JHSWorker():
     def process(self, _obj, _crawl_type, _val=None):
         self.init_crawl(_obj, _crawl_type)
 
-        i, M = 0, 3
+        i, M = 0, 5
         n = 0
         while True: 
             if _crawl_type and _crawl_type != '':

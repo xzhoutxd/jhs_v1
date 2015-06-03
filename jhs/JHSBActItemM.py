@@ -209,9 +209,9 @@ class JHSBActItemM(MyThread):
                     continue
 
                 # 存网页
-                #if item and crawl_type != '':
-                #    _pages = item.outItemPage(crawl_type)
-                #    self.mongofsAccess.insertJHSPages(_pages)
+                if item and crawl_type != '':
+                    _pages = item.outItemPage(crawl_type)
+                    self.mongofsAccess.insertJHSPages(_pages)
 
                     
                 # 通知queue, task结束
