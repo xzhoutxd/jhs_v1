@@ -50,6 +50,10 @@ class NoShopItemException(Exception):
 class SystemBusyException(Exception):
     pass
 
+# retry exception
+class RetryException(Exception):
+    pass
+
 def traceback_log():
     print '#####--Traceback Start--#####'
     tp,val,td = sys.exc_info()

@@ -121,6 +121,10 @@ class JHSWorker():
             print '# System busy exception:',e
             self.crawlRetry(_key,msg)
             time.sleep(random.uniform(10,30))
+        except Common.RetryException as e:
+            print '# Retry exception:',e
+            self.crawlRetry(_key,msg)
+            time.sleep(random.uniform(20,30))
         except Exception as e:
             print '# exception err:',e
             self.crawlRetry(_key,msg)
@@ -234,6 +238,10 @@ class JHSWorker():
         item_list = m_itemsObj.items
         print '# Activity find new Items num:', len(item_val_list)
         print '# Activity crawl Items num:', len(item_list)
+        giveup_items = m_itemsObj.giveup_items
+        if len(giveup_items) > 0:
+            print '# Activity giveup Items num:',len(giveup_items)
+            raise Common.RetryException('# run_actItems: actid:%s actname:%s some items retry more than max times..'%(str(act.brandact_id),str(act.brandact_name)))
         print '# Activity Items end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), act.brandact_id, act.brandact_name
         return item_list
 
@@ -327,6 +335,10 @@ class JHSWorker():
         item_list = m_itemsObj.items
         print '# Activity Items num:', len(item_val_list)
         print '# Activity crawl Items num:', len(item_list)
+        giveup_items = m_itemsObj.giveup_items
+        if len(giveup_items) > 0:
+            print '# Activity giveup Items num:',len(giveup_items)
+            raise Common.RetryException('# run_item: actid:%s actname:%s some items retry more than max times..'%(str(brandact_id),str(brandact_name)))
         print '# Activity Items end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), brandact_id, brandact_name
 
     def process(self, _obj, _crawl_type, _val=None):
@@ -406,8 +418,8 @@ class JHSWorker():
         _acts = self.mysqlAccess.selectActsRedisdata()
         print '# acts num:',len(_acts)
         i = 0
-        #for _act in _acts:
-            #act_id = _act[2]
+        for _act in _acts:
+            act_id = _act[2]
             #_itemids = self.mysqlAccess.selectItemsids(str(act_id))
             #item_ids = []
             #for _itemid in _itemids:
@@ -418,7 +430,10 @@ class JHSWorker():
             #keys = [self.worker_type, str(act_id)]
             #print keys
             #if self.redisAccess.exist_jhsact(keys):
-                #i += 1
+                #act_redis = self.redisAccess.read_jhsact(keys)
+                #if len(act_redis) != 15:
+                #    print act_redis
+                #    i += 1
                 #print self.redisAccess.read_jhsact(keys)
                 #self.redisAccess.delete_jhsact(keys)
             #self.redisAccess.write_jhsact(keys, act_val)
@@ -455,7 +470,7 @@ if __name__ == '__main__':
     #w.actsRedis()
     # put items in redis 
     #w.itemsRedis()
-    #act_id = 6979575
+    #act_id = 7014411
     #keys = [w.worker_type, str(act_id)]
     #if w.redisAccess.exist_jhsact(keys):
     #    print w.redisAccess.read_jhsact(keys)
