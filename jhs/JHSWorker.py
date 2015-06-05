@@ -344,7 +344,7 @@ class JHSWorker():
     def process(self, _obj, _crawl_type, _val=None):
         self.init_crawl(_obj, _crawl_type)
 
-        i, M = 0, 10
+        i, M = 0, 20
         n = 0
         while True: 
             if _crawl_type and _crawl_type != '':
