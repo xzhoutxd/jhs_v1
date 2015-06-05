@@ -125,7 +125,7 @@ crawl_retry = 10
 home_crawl_retry = 30
 json_crawl_retry = 30
 act_crawl_retry = 20
-item_crawl_retry = 20
+item_crawl_retry = 10
 
 # 并发线程值
 act_max_th = 10
