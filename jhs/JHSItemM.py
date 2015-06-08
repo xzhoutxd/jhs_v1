@@ -241,12 +241,12 @@ class JHSItemM(MyThread):
                     #print '# Day To crawl activity item val : ', Common.now_s()
                     # 汇聚
                     # redis
-                    self.putActDB(item)
-                    self.push_back(self.items, item.outTupleDay())
+                    #self.putActDB(item)
+                    #self.push_back(self.items, item.outTupleDay())
                     # 入库
-                    updateSql = item.outSqlForUpdate()
-                    if updateSql:
-                        self.mysqlAccess.updateJhsItem(updateSql)
+                    #updateSql = item.outSqlForUpdate()
+                    #if updateSql:
+                    #    self.mysqlAccess.updateJhsItem(updateSql)
 
                     daySql = item.outSqlForDay()
                     _itemdaysql_list.append(daySql)

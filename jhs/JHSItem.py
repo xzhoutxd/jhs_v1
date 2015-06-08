@@ -644,7 +644,8 @@ class JHSItem():
         self.crawling_beginHour = time.strftime("%H", time.localtime(self.crawling_begintime))
 
         # 聚划算商品页信息
-        self.itemPage()
+        #self.itemPage()
+        self.itemConfig()
         self.item_pages['item-home-day'] = (self.item_ju_url, self.item_juPage)
         # 是否售卖
         self.itemLock(self.item_juPage)
@@ -652,8 +653,6 @@ class JHSItem():
         self.itemDynamic(self.item_juPage)
         if self.item_soldCount == '' or self.item_stock == '':
             print '# item not get soldcount or stock,item_juid:%s,item_id:%s,item_actid:%s'%(str(self.item_juId),str(self.item_id),str(self.item_actId))
-        page_datepath = 'item/day/' + time.strftime("%Y/%m/%d/%H/", time.localtime(self.crawling_begintime))
-        self.writeLog(page_datepath)
 
     # Hour
     def antPageHour(self, val):
