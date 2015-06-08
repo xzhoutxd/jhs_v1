@@ -13,7 +13,7 @@ import threading
 import base.Common as Common
 import base.Config as Config
 #from db.MysqlAccess import MysqlAccess
-from JHSBActItem import JHSBActItem
+from JHSAct import JHSAct
 
 class testItem():
     '''A class of test item'''
@@ -23,7 +23,7 @@ class testItem():
         #self.mysqlAccess = MysqlAccess()
 
     def test(self):
-        item = JHSBActItem()
+        item = JHSAct()
         #item.brandact_url = 'http://ju.taobao.com/tg/brand_items.htm?spm=608.7666661.floor7.45.o6UaqZ&act_sign_id=5577923'
         #item.brandact_url = 'http://ju.taobao.com/tg/brand_items.htm?spm=608.7666661.floor7.54.o6UaqZ&act_sign_id=5571938'
         #item.brandact_url = 'http://act.ju.taobao.com/market/ju/beibeipake0406.php'

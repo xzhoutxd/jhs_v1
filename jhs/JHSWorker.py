@@ -15,7 +15,7 @@ from dial.DialClient import DialClient
 from db.MysqlAccess import MysqlAccess
 from Message import Message
 from Jsonpage import Jsonpage
-from JHSBActItem import JHSBActItem
+from JHSAct import JHSAct
 from JHSItemM import JHSItemM
 sys.path.append('../db')
 from RedisQueue  import RedisQueue
@@ -158,10 +158,10 @@ class JHSWorker():
         print '# act start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         act_obj = None
         if self._crawl_type == 'main':
-            act_obj = JHSBActItem()
+            act_obj = JHSAct()
             act_obj.antPageMain(msg_val)
         elif self._crawl_type == 'check':
-            act_obj = JHSBActItem()
+            act_obj = JHSAct()
             act_obj.antPageCheck(msg_val)
         print '# act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 

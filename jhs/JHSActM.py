@@ -14,14 +14,14 @@ from dial.DialClient import DialClient
 from base.MyThread  import MyThread
 from Queue import Empty
 from db.MysqlAccess import MysqlAccess
-from JHSBActItem import JHSBActItem
+from JHSAct import JHSAct
 sys.path.append('../db')
 from MongofsAccess import MongofsAccess
 
 import warnings
 warnings.filterwarnings("ignore")
 
-class JHSBActItemM(MyThread):
+class JHSActM(MyThread):
     '''A class of jhs activity item thread manager'''
     def __init__(self, jhs_type, thread_num = 15, a_val=None):
         # parent construct
@@ -139,7 +139,7 @@ class JHSBActItemM(MyThread):
                 crawl_type = ''
                 if self.jhs_type == 1:
                     # 品牌团实例 即将上线
-                    item = JHSBActItem()
+                    item = JHSAct()
 
                     # 信息处理
                     _val  = _data[1]
@@ -157,7 +157,7 @@ class JHSBActItemM(MyThread):
                     if self.insertActcoming(_actcomingsql_list): _actcomingsql_list = []
                 elif self.jhs_type == 2:
                     # 品牌团实例 检查活动新加商品
-                    item = JHSBActItem()
+                    item = JHSAct()
 
                     # 信息处理
                     _val  = _data[1]
@@ -168,7 +168,7 @@ class JHSBActItemM(MyThread):
                     self.push_back(self.items, item.outTupleForHourcheck())
                 elif self.jhs_type == 3:
                     # 品牌团实例
-                    item = JHSBActItem()
+                    item = JHSAct()
 
                     # 信息处理
                     _val  = _data[1]
@@ -181,7 +181,7 @@ class JHSBActItemM(MyThread):
 
                 elif self.jhs_type == 4:
                     # 还没有开团的品牌团实例
-                    item = JHSBActItem()
+                    item = JHSAct()
 
                     # 信息处理
                     _val  = _data[1]
@@ -194,7 +194,7 @@ class JHSBActItemM(MyThread):
 
                 elif self.jhs_type == 5:
                     # 解析品牌团数据
-                    item = JHSBActItem()
+                    item = JHSAct()
 
                     # 信息处理
                     _val  = _data[1]

@@ -14,7 +14,7 @@ import base.Common as Common
 import base.Config as Config
 from base.TBCrawler import TBCrawler
 
-class JHSBActItem():
+class JHSAct():
     '''A class of brand activity Item'''
     def __init__(self):
         # 品牌团抓取设置

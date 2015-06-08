@@ -14,7 +14,7 @@ import base.Common as Common
 import base.Config as Config
 from base.TBCrawler import TBCrawler
 from db.MysqlAccess import MysqlAccess
-from JHSBActItemM import JHSBActItemM
+from JHSActM import JHSActM
 from JHSItem import JHSItem
 from JHSItemM import JHSItemM
 

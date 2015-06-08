@@ -15,12 +15,12 @@ import base.Config as Config
 #from base.TBCrawler import TBCrawler
 from base.RetryCrawler import RetryCrawler
 from db.MysqlAccess import MysqlAccess
-from JHSBActItemM import JHSBActItemM
+from JHSActM import JHSActM
 from JHSHomeBrand import JHSHomeBrand
 from JHSBrandTEMP import JHSBrandTEMP
 from Jsonpage import Jsonpage
 
-class JHSBrandPosition():
+class JHSActPosition():
     '''A class of brand position'''
     def __init__(self):
         # mysql
@@ -115,9 +115,9 @@ class JHSBrandPosition():
         print '# brand activities start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         # 多线程 控制并发的线程数
         if len(act_valList) > Config.act_max_th:
-            m_Obj = JHSBActItemM(5, Config.act_max_th)
+            m_Obj = JHSActM(5, Config.act_max_th)
         else:
-            m_Obj = JHSBActItemM(5, len(act_valList))
+            m_Obj = JHSActM(5, len(act_valList))
         m_Obj.putItems(act_valList)
         m_Obj.createthread()
         m_Obj.run()
@@ -166,7 +166,7 @@ class JHSBrandPosition():
 
 if __name__ == '__main__':
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-    b = JHSBrandPosition()
+    b = JHSActPosition()
     b.antPage()
     time.sleep(1)
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
