@@ -778,10 +778,10 @@ class JHSItem():
         if self.item_isLock_time:
             item_isLock_time = Common.time_s(self.item_isLock_time)
         item_starttime = ''
-        if self.item_starttime and float(self.item_starttime) != 0.0:
+        if self.item_starttime and float(self.item_starttime) != 0.0 and int(self.item_starttime) > 0:
             item_starttime = Common.time_s(float(self.item_starttime)/1000)
         item_endtime = ''
-        if self.item_endtime and float(self.item_endtime) != 0.0:
+        if self.item_endtime and float(self.item_endtime) != 0.0 and int(self.item_endtime) > 0:
             item_endtime = Common.time_s(float(self.item_endtime)/1000)
         item_remindNum = ''
         if str(self.item_remindNum) != '':
@@ -815,10 +815,10 @@ class JHSItem():
         if self.item_isLock_time:
             item_isLock_time = Common.time_s(self.item_isLock_time)
         item_starttime = ''
-        if self.item_starttime and float(self.item_starttime) != 0.0:
+        if self.item_starttime and float(self.item_starttime) != 0.0 and int(self.item_starttime) > 0:
             item_starttime = Common.time_s(float(self.item_starttime)/1000)
         item_endtime = ''
-        if self.item_endtime and float(self.item_endtime) != 0.0:
+        if self.item_endtime and float(self.item_endtime) != 0.0 and int(self.item_endtime) > 0:
             item_endtime = Common.time_s(float(self.item_endtime)/1000)
         item_remindNum = ''
         if str(self.item_remindNum) != '':
