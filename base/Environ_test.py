@@ -36,7 +36,7 @@ mysql_config = {
 }
 
 ######################## Mongodb配置  #####################
-mongodb_config = {'host':'192.168.1.113', 'port':9073}
+mongodb_config = {'host':'192.168.1.112', 'port':9073}
 
 # mongodb gridfs collection名
 mongodb_fs = 'fs'
