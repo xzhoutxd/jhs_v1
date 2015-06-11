@@ -373,7 +373,7 @@ class JHSItem():
                     i_baseInfo = json.loads(baseInfo)
                     self.item_baseInfoDict(i_baseInfo)
                 except Exception as e:
-                    self.item_baseInfoString(baseInfo)
+                    self.item_baseInfoString(self.item_pageData)
 
             name = ''
             m = re.search(r'"name":({.+?}),"price":', self.item_pageData, flags=re.S)
@@ -388,7 +388,7 @@ class JHSItem():
                     i_name = json.loads(name)
                     self.item_nameDict(i_name)
                 except Exception as e:
-                    self.item_nameString(name)
+                    self.item_nameString(self.item_pageData)
 
             m = re.search(r'"remind":({.+?})', self.item_pageData, flags=re.S)
             if m:
@@ -397,25 +397,37 @@ class JHSItem():
                     i_remind = json.loads(remind)
                     self.item_remindDict(i_remind)
                 except Exception as e:
-                    self.item_remindString(remind)
+                    self.item_remindString(self.item_pageData)
         
+            price = ''
             m = re.search(r'"price":({.+?}),"remind"', self.item_pageData, flags=re.S)
             if m:
                 price = m.group(1)
+            else: 
+                m = re.search(r'"price":({.+?})', self.item_pageData, flags=re.S)
+                if m:
+                    price = m.group(1)
+            if price != '':
                 try:
                     i_price = json.loads(price)
                     self.item_priceDict(i_price)
                 except Exception as e:
-                    self.item_priceString(price)
+                    self.item_priceString(self.item_pageData)
 
+            merit = ''
             m = re.search(r'"merit":({.+?}),"name"', self.item_pageData, flags=re.S)
             if m:
                 merit = m.group(1)
+            else:
+                m = re.search(r'"merit":({.+?})', self.item_pageData, flags=re.S)
+                if m:
+                    merit = m.group(1)
+            if merit != '':
                 try:
                     i_merit = json.loads(merit)
                     self.item_meritDict(i_merit)
                 except Exception as e:
-                    self.item_meritString(merit)
+                    self.item_meritString(self.item_pageData)
 
     # Json string baseInfo
     def item_baseInfoString(self, i_baseInfo):
