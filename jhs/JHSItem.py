@@ -427,7 +427,7 @@ class JHSItem():
                     i_merit = json.loads(merit)
                     self.item_meritDict(i_merit)
                 except Exception as e:
-                    self.item_meritString(self.item_pageData)
+                    self.item_meritString(merit)
 
     # Json string baseInfo
     def item_baseInfoString(self, i_baseInfo):
