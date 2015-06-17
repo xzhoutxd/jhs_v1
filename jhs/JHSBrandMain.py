@@ -30,8 +30,11 @@ class JHSBrandMain():
         # 页面模板解析
         self.brand_temp = JHSBrandTEMP()
 
+        # cat home queue
+        self.home_queue = JHSCatQ('home')
+
         # cat queue
-        self.cat_queue = JHSCatQ()
+        self.cat_queue = JHSCatQ('main')
 
         # act queue
         self.act_queue = JHSActQ('main')
@@ -48,6 +51,62 @@ class JHSBrandMain():
         self.m_type = m_type
 
     def antPage(self):
+        try:
+            # 主机器需要配置redis队列
+            if self.m_type == 'm':
+                # 清空分类类表也home url redis队列
+                self.home_queue.clearCatQ()
+                # 保存到redis队列
+                self.home_queue.putCatlistQ([(Config.ju_brand_home, Config.ju_home)])
+                print '# cat home queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                
+            # 类目json url list
+            obj = 'cat'
+            crawl_type = 'home'
+            self.work.process(obj,crawl_type)
+            # json url list
+            json_val_list = self.work.items
+            if json_val_list and len(json_val_list) > 0:
+                # 清空分类的json url redis队列
+                self.cat_queue.clearCatQ()
+                # 保存到redis队列
+                self.cat_queue.putCatlistQ([json_val_list[0]])
+                print '# cat main queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+                # 清空act redis队列
+                self.act_queue.clearActQ()
+
+            # 类目的活动Json
+            obj = 'cat'
+            crawl_type = 'main'
+            # 获取还没有开团的活动id
+            val = (Common.time_s(Common.now()),)
+            acts = self.mysqlAccess.selectJhsActNotStart(val)
+            brandact_id_list = []
+            if acts:
+                for act in acts:
+                    brandact_id_list.append(str(act[1]))
+            a_val = (self.begin_time, brandact_id_list)
+            self.work.process(obj,crawl_type,a_val)
+
+            # 活动数据
+            act_val_list = self.work.items
+            # 保存到redis队列
+            self.act_queue.putActlistQ(act_val_list)
+            print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+            """
+            #obj = 'act'
+            #crawl_type = 'main'
+            #self.work.process(obj,crawl_type)
+            """
+
+        except Exception as e:
+            print '# exception err in antPage info:',e
+            Common.traceback_log()
+
+
+    def antPageOld(self):
         try:
             # 主机器需要配置redis队列
             if self.m_type == 'm':

@@ -198,9 +198,9 @@ class Jsonpage():
             for i in range(0,len(activities)):
                 activity = activities[i]
                 if a_val:
-                    val = (activity, page[2], page[1], (b_position_start+i+1)) + a_val
+                    val = (activity, page[1], page[2], (b_position_start+i+1)) + a_val
                 else:
-                    val = (activity, page[2], page[1], (b_position_start+i+1))
+                    val = (activity, page[1], page[2], (b_position_start+i+1))
                 act_valList.append(val)
         print '# brand activities parse json end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         return act_valList

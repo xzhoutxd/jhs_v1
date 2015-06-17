@@ -18,9 +18,10 @@ from RedisAccess import RedisAccess
 
 class JHSCatQ():
     '''A class of jhs cat redis queue'''
-    def __init__(self):
+    def __init__(self, _q_type):
         self._obj        = 'cat'
-        self.jhs_type    = Config.JHS_TYPE   # queue type
+        self._q_type     = _q_type           # queue type
+        self.jhs_type    = Config.JHS_TYPE   # obj type
         # DB
         self.redisQueue  = RedisQueue()      # redis queue
         #self.redisAccess = RedisAccess()     # redis db
@@ -29,7 +30,8 @@ class JHSCatQ():
         self.message     = Message()
 
         # queue key
-        self._key        = '%s_%s' % (self.jhs_type, self._obj)
+        self._key        = '%s_%s_%s' % (self.jhs_type, self._obj, self._q_type)
+
 
     # clear cat queue
     def clearCatQ(self):

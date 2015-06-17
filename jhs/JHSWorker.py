@@ -13,6 +13,8 @@ import base.Common as Common
 import base.Config as Config
 from dial.DialClient import DialClient
 from db.MysqlAccess import MysqlAccess
+from base.TBCrawler import TBCrawler
+from JHSBrandTEMP import JHSBrandTEMP
 from Message import Message
 from Jsonpage import Jsonpage
 from JHSAct import JHSAct
@@ -36,6 +38,12 @@ class JHSWorker():
 
         # 获取Json数据
         self.jsonpage      = Jsonpage()
+
+        # 抓取设置
+        self.crawler       = TBCrawler()
+
+        # 页面模板解析
+        self.brand_temp    = JHSBrandTEMP()
 
         # message
         self.message       = Message()
@@ -133,11 +141,40 @@ class JHSWorker():
 
     # CAT queue
     def run_cat(self, msg, _val):
+        if self._crawl_type == 'home':
+            self.parse_homepage(msg, _val)
+        elif self._crawl_type == 'main':
+            self.get_cat_json(msg, _val)
+
+    def parse_homepage(self, msg, _val):
+        msg_val = msg["val"]
+        _url, refers = msg_val
+        print '# brand home:',_url
+        page = self.crawler.getData(_url, refers)
+        # save to mongo
+        # timeStr_jhstype_webtype_itemgroupcat_catid
+        time_s = time.strftime("%Y%m%d%H", time.localtime(self.crawling_time))
+        key = '%s_%s_%s_%s_%s_%s' % (time_s,Config.JHS_TYPE,'1','cathome')
+        p_content = '<!-- url=%s --> %s' % (_url,page)
+        self.mongofsAccess.insertJHSPages((key,p_content))
+
+        c_url_val_list = self.brand_temp.temp(page)
+        for c_url_val in c_url_val_list:
+            c_url, c_name, c_id = c_url_val
+            self.items.append((Common.fix_url(c_url),c_id,c_name,Config.ju_brand_home))
+
+    def get_cat_json(self, msg, _val):
+        msg_val = msg["val"]
+        c_url, c_id, c_name, refers = msg_val
+        a_val = (c_id, c_name)
+        print '# category',c_name,c_id
         bResult_list = []
+        """
         c_url  = msg["url"]
         a_val  = (msg["id"],msg["name"])
         refers = msg["refers"]
         print '# category',msg["id"],msg["name"]
+        """
         # get json
         bResult_list = self.jsonpage.get_jsonPage(c_url,refers,a_val)
 
@@ -345,6 +382,8 @@ class JHSWorker():
         self.init_crawl(_obj, _crawl_type)
 
         i, M = 0, 20
+        if _obj == 'cat':
+            M = 5
         n = 0
         while True: 
             if _crawl_type and _crawl_type != '':

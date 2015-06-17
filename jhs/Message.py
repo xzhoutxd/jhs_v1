@@ -12,6 +12,17 @@ class Message():
         pass
 
     ##### 品牌团 #####
+    def jhsQueueMsg(self, _obj, _val):
+        if _obj == "cat":
+            return self.jhsCatQueueMsg(_val)
+        elif _obj == "act":
+            return self.jhsActQueueMsg(_val)
+        elif _obj == "item":
+            return self.jhsItemQueueMsg(_val)
+        else:
+            return None
+
+    """
     def jhsCatQueueMsg(self, _cat):
         _retry, _obj, _type, _c_url, _c_id, _c_name, _refers = _cat
         cat = {}
@@ -22,6 +33,15 @@ class Message():
         cat["id"]     = _c_id
         cat["name"]   = _c_name
         cat["refers"] = _refers
+        return cat
+    """
+
+    def jhsCatQueueMsg(self, _cat):
+        cat = {}
+        cat["retry"]  = _cat[0]
+        cat["obj"]    = _cat[1]
+        cat["type"]   = _cat[2]
+        cat["val"]    = _cat[3:]
         return cat
 
     def jhsActQueueMsg(self, _act):
