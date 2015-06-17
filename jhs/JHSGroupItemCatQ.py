@@ -18,6 +18,7 @@ from JHSGroupItemM import JHSGroupItemParserM
 from JHSGroupItemM import JHSGroupItemCrawlerM
 sys.path.append('../db')
 from RedisQueue  import RedisQueue
+from MongofsAccess import MongofsAccess
 
 class JHSGroupItemCatQ():
     '''A class of jhs groupitem category redis queue'''
@@ -30,6 +31,7 @@ class JHSGroupItemCatQ():
         self._key = '%s_%s_%s' % (self.jhs_type,self.item_type,self.jhs_queue_type)
         # DB
         self.redisQueue  = RedisQueue()      # redis queue
+        self.mongofsAccess = MongofsAccess()   # mongodb fs access
 
         # result
         self.items = []
@@ -119,9 +121,19 @@ class JHSGroupItemCatQ():
         # process ajax url list
         item_json_index = 0
         item_soldout_num = 0
+        # mongo json pages
+        cat_pages = {}
         for a_url in ajax_url_list:
             # get json from ajax url
             Result_list = self.jsonpage.get_json([a_url])
+            # mongo page json
+            _url,_refers,_val = a_url 
+            _c_id = _val[0]
+            time_s = time.strftime("%Y%m%d%H", time.localtime(self.crawling_time))
+            # timeStr_jhstype_webtype_itemgroupcat_catid
+            key = '%s_%s_%s_%s_%s_%s' % (time_s,Config.JHS_TYPE,'1','itemgroupcat',str(_c_id))
+            cat_pages[key] = '<!-- url=%s --> %s' % (_url,str(Result_list))
+
             item_result_list = []
             act_result_list = []
             if Result_list and len(Result_list) > 0:
@@ -159,6 +171,11 @@ class JHSGroupItemCatQ():
                         item_list.append((item_info,) + a_val)
         if len(item_list) > 0:
             self.process_items(item_list)
+
+        # cat pages json 
+        for key in cat_pages.keys():
+            _pages = (key,cat_pages[key])
+            self.mongofsAccess.insertJHSPages(_pages)
 
     # parse item list and crawl new items
     def process_items(self, item_list):

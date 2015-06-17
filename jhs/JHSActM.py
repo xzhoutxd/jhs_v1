@@ -147,8 +147,6 @@ class JHSActM(MyThread):
                     print '# To crawl coming activity val : ', Common.now_s(), _val[1], _val[2], _val[3]
                     crawl_type = 'coming'
                     # 汇聚
-                    #self.push_back(self.items, item.outSqlForComing())
-                    #sql = item.outSqlForComing()
                     self.push_back(self.items, item.outTupleForComing())
                     crawling_confirm,sql = item.outTupleForComing()
                     # 入库

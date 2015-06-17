@@ -179,9 +179,13 @@ class Jsonpage():
                     for brand_info in p.finditer(brandlist_info):
                         brand = brand_info.group(1)
                         activities.append(brand)
-                m = re.search(r'"currentPage":(\d+),', page_info, flags=re.S)
-                if m:
-                    currentPage = int(m.group(1))
+                    m = re.search(r'"currentPage":(\d+),', page_info, flags=re.S)
+                    if m:
+                        currentPage = int(m.group(1))
+                else:
+                    continue
+            else:
+                continue
             print '# brand every page num:',len(activities)
 
             b_position_start = 0
