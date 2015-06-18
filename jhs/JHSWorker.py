@@ -152,9 +152,9 @@ class JHSWorker():
         print '# brand home:',_url
         page = self.crawler.getData(_url, refers)
         # save to mongo
-        # timeStr_jhstype_webtype_itemgroupcat_catid
+        # timeStr_jhstype_webtype_obj_crawltype
         time_s = time.strftime("%Y%m%d%H", time.localtime(self.crawling_time))
-        key = '%s_%s_%s_%s_%s_%s' % (time_s,Config.JHS_TYPE,'1','cathome')
+        key = '%s_%s_%s_%s_%s' % (time_s,Config.JHS_TYPE,'1',self._obj,self._crawl_type)
         p_content = '<!-- url=%s --> %s' % (_url,page)
         self.mongofsAccess.insertJHSPages((key,p_content))
 

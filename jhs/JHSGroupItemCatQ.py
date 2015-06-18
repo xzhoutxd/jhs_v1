@@ -131,7 +131,7 @@ class JHSGroupItemCatQ():
             _c_id = _val[0]
             time_s = time.strftime("%Y%m%d%H", time.localtime(self.crawling_time))
             # timeStr_jhstype_webtype_itemgroupcat_catid
-            key = '%s_%s_%s_%s_%s_%s' % (time_s,Config.JHS_TYPE,'1','itemgroupcat',str(_c_id))
+            key = '%s_%s_%s_%s_%s' % (time_s,Config.JHS_TYPE,'1','itemgroupcat',str(_c_id))
             cat_pages[key] = '<!-- url=%s --> %s' % (_url,str(Result_list))
 
             item_result_list = []
