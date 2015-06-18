@@ -70,7 +70,7 @@ class JHSBrandMain():
                 # 清空分类的json url redis队列
                 self.cat_queue.clearCatQ()
                 # 保存到redis队列
-                self.cat_queue.putCatlistQ([json_val_list[0]])
+                self.cat_queue.putCatlistQ(json_val_list)
                 print '# cat main queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                 # 清空act redis队列
