@@ -174,7 +174,7 @@ class JHSGroupItemCrawlerM(MyThread):
 
                     update_Sql,hourSql = item.outTupleGroupItemHour()
                     if update_Sql:
-                        self.mysqlAccess.updateJhsGroupItem(updateSql)
+                        self.mysqlAccess.updateJhsGroupItem(update_Sql)
                     _itemhoursql_list.append(hourSql)
                     if self.insertItemhour(_itemhoursql_list): _itemhoursql_list = []
 
