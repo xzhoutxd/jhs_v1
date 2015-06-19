@@ -210,7 +210,9 @@ class JHSItemQM(MyThread):
                     # 汇聚
                     #self.push_back(self.items, item.outTupleGroupItemHour())
 
-                    hourSql = item.outTupleGroupItemHour()
+                    update_Sql,hourSql = item.outTupleGroupItemHour()
+                    if update_Sql:
+                        self.mysqlAccess.updateJhsGroupItem(updateSql)
                     _itemhoursql_list.append(hourSql)
                     if self.insertItemhour(_itemhoursql_list): _itemhoursql_list = []
 
