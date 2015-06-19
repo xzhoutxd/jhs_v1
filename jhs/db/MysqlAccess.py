@@ -136,6 +136,15 @@ class MysqlAccess():
         except Exception, e:
             print '# select Jhs not end act exception:', e
 
+    # 本小时结束的活动
+    def selectJhsActEndPrevHour(self, args):
+        # 结束时间大于上一个小时，小于这个小时，非俪人购
+        try:
+            sql = 'select act_id from nd_jhs_parser_activity where end_time > %s and end_time < %s and act_sign != 3'
+            return self.jhs_db.select(sql, args)
+        except Exception, e:
+            print '# select Jhs not end act exception:', e
+
     # 没有结束的活动
     def selectJhsActNotEnd(self, args):
         # 非俪人购
@@ -305,6 +314,15 @@ class MysqlAccess():
             self.jhs_db.executemany(sql, args_list)
         except Exception, e:
             print '# itemgroup insert Jhs item position exception:', e
+
+    # 更新商品信息
+    def updateJhsGroupItem(self, args):
+        try:
+            sql = 'call sp_update_jhsitemgroup_parser_item(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+            self.jhs_db.execute(sql, args)
+        except Exception, e:
+            print '# update Jhs itemgroup Item exception:', e
+
     
 
 if __name__ == '__main__':

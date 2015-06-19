@@ -730,16 +730,24 @@ class JHSItem():
     # Hour
     def antPageGroupItemHour(self, val):
         self.item_groupCat_url,self.item_juId,self.item_id,self.item_ju_url,self.crawling_begintime,self.hour_index = val
+
+        # 商品页信息
+        self.itemConfig()
+        self.item_pages['item-home-hour'] = (self.item_ju_url, self.item_juPage)
+        # 是否售卖
+        self.itemLock(self.item_juPage)
+
         # 商品关注人数, 商品销售数量, 商品库存
-        self.itemDynamic(self.item_juPage)
+        #self.itemDynamic(self.item_juPage)
         if self.item_soldCount == '' or self.item_stock == '':
-            # 聚划算商品页信息
-            self.itemPage()
-            self.item_pages['item-home-hour'] = (self.item_ju_url, self.item_juPage)
-            # 商品关注人数, 商品销售数量, 商品库存
-            self.itemDynamic(self.item_juPage)
-            if self.item_soldCount == '' or self.item_stock == '':
-                print '# item not get soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
+            print '# item not get soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
+        #    # 聚划算商品页信息
+        #    self.itemPage()
+        #    self.item_pages['item-home-hour'] = (self.item_ju_url, self.item_juPage)
+        #    # 商品关注人数, 商品销售数量, 商品库存
+        #    self.itemDynamic(self.item_juPage)
+        #    if self.item_soldCount == '' or self.item_stock == '':
+        #        print '# item not get soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
 
     def itemStatus(self):
         if self.item_status:
@@ -848,6 +856,30 @@ class JHSItem():
     # 商品团每小时销量库存的SQL
     def outGroupItemSqlForHour(self):
         return (Common.date_s(self.crawling_time),str(self.hour_index),str(self.item_juId),str(self.item_soldCount),str(self.item_stock))
+    # 商品团更新SQL
+    def outGroupItemSqlForUpdate(self):
+        item_starttime = ''
+        if self.item_starttime and float(self.item_starttime) != 0.0 and int(self.item_starttime) > 0:
+            item_starttime = Common.time_s(float(self.item_starttime)/1000)
+        item_endtime = ''
+        if self.item_endtime and float(self.item_endtime) != 0.0 and int(self.item_endtime) > 0:
+            item_endtime = Common.time_s(float(self.item_endtime)/1000)
+
+        item_isLock_time = ''
+        if self.item_isLock_time:
+            item_isLock_time = Common.time_s(self.item_isLock_time)
+            if self.item_isLock and int(self.item_isLock) == 0:
+                if item_endtime and item_endtime != '' and item_endtime < item_isLock_time:
+                    self.item_status = 'end'
+                else:
+                    self.item_status = 'soldout'
+            elif self.item_isLock and int(self.item_isLock) == 1:
+                self.item_status = 'avil'
+            
+        item_remindNum = ''
+        if str(self.item_remindNum) != '':
+            item_remindNum = str(self.item_remindNum)
+        return (str(self.item_juId),Common.fix_url(self.item_ju_url),Common.fix_url(self.item_juPic_url),self.item_juName,self.item_juDesc,str(self.item_id),self.item_status,self.item_merit,str(self.item_oriPrice),str(self.item_actPrice),str(self.item_discount),item_remindNum,item_starttime,item_endtime)
 
 
     # 商品团商品信息
@@ -858,7 +890,7 @@ class JHSItem():
         return (self.item_status_type,self.outGroupItemParserSql(),(self.item_pageData,self.item_groupCatId,self.item_groupCatName,self.item_groupCat_url,self.item_subNavName,self.item_position))
     # 商品团商品每小时销售信息
     def outTupleGroupItemHour(self):
-        return self.outGroupItemSqlForHour()
+        return (self.outGroupItemSqlForUpdate(),self.outGroupItemSqlForHour())
 
     # 输出商品的网页
     def outItemPage(self,crawl_type):
