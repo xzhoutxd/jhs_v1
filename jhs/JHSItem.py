@@ -110,7 +110,8 @@ class JHSItem():
         # 商品聚划算Id
         self.item_juId = item_juId
         # 商品活动展示图片Url
-        self.item_juPic_url = Common.fix_url(item_juPic_url)
+        #self.item_juPic_url = Common.fix_url(item_juPic_url)
+        self.item_juPic_url = Common.fix_url(re.sub(r'jpg_.+?\.jpg','jpg',item_juPic_url))
         # 本次抓取开始时间
         self.crawling_begintime = begin_time
         # 商品所在活动的开团时间
@@ -163,6 +164,8 @@ class JHSItem():
                 m = re.search(r'<div class="normal-pic.+?<img.+?data-ks-imagezoom="(.+?)".+?/>', i_page, flags=re.S)
                 if m:
                     self.item_juPic_url = Common.fix_url(m.group(1))
+
+            self.item_juPic_url = Common.fix_url(re.sub(r'jpg_.+?\.jpg','jpg',self.item_juPic_url))
 
         # 商品链接
         m = re.search(r'<div class="normal-pic.+?<a href="(.+?)".+?>', i_page, flags=re.S)
@@ -470,6 +473,8 @@ class JHSItem():
                     if m:
                         self.item_juPic_url = Common.fix_url(m.group(1))
 
+            self.item_juPic_url = Common.fix_url(re.sub(r'jpg_.+?\.jpg','jpg',self.item_juPic_url))
+
     # Json string name
     def item_nameString(self, i_name):
         if i_name:
@@ -582,6 +587,7 @@ class JHSItem():
                 self.item_juPic_url = Common.fix_url(i_baseInfo['picUrlM'])
             elif i_baseInfo.has_key('picUrlW') and i_baseInfo['picUrlW']:
                 self.item_juPic_url = Common.fix_url(i_baseInfo['picUrlW'])
+            self.item_juPic_url = Common.fix_url(re.sub(r'jpg_.+?\.jpg','jpg',self.item_juPic_url))
 
     # Json dict name
     def item_nameDict(self, i_name):
