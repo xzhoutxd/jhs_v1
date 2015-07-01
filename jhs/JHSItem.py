@@ -125,7 +125,7 @@ class JHSItem():
         # 聚划算商品页信息
         self.itemPage()
         page = self.item_juPage
-        self.item_pages['item-home'] = (self.item_ju_url, page)
+        #self.item_pages['item-home'] = (self.item_ju_url, page)
         m = re.search(r'<div id="content" class="detail">(.+?)</div> <!-- /content -->', page, flags=re.S)
         if m:
             i_page = m.group(1)
@@ -233,7 +233,7 @@ class JHSItem():
 
         if self.item_id == '' or self.item_juId == '' or self.item_url == '' or self.item_actPrice == '': raise Common.InvalidPageException("# itemConfig: not find ju item params,juid:%s,item_ju_url:%s,%s,%s,%s,%s,%s"%(str(self.item_juId), self.item_ju_url,self.item_id,self.item_juId,self.item_url,self.item_actPrice,self.item_discount))
         # 商品关注人数, 商品销售数量, 商品库存
-        self.itemDynamic(i_page)
+        #self.itemDynamic(i_page)
 
     def fix_item_jupic_url(self):
         self.item_juPic_url = re.sub(r'jpg_.+?\.jpg','jpg',self.item_juPic_url)
@@ -650,17 +650,21 @@ class JHSItem():
         page, actId, actName, actUrl, position, item_ju_url, item_id, item_juId, item_juPic_url, begin_time, act_starttime,act_endtime = val
         self.initItem(page, actId, actName, actUrl, position, item_ju_url, item_id, item_juId, item_juPic_url, begin_time, act_starttime, act_endtime)
         self.itemConfig()
+        self.item_pages['item-home'] = (self.item_ju_url, self.item_juPage)
+        # 商品关注人数, 商品销售数量, 商品库存
+        self.itemDynamic(self.item_juPage)
         self.itemPromotiton()
 
     # update
     def antPageUpdate(self, val):
         self.item_juId,self.item_actId,self.item_ju_url,self.item_act_url,self.item_id,self.crawling_begintime = val
         self.itemConfig()
-        self.itemPromotiton()
+        self.item_pages['item-home-update'] = (self.item_ju_url, self.item_juPage)
         # 是否售卖
         self.itemLock(self.item_juPage)
         # 商品关注人数, 商品销售数量, 商品库存
         self.itemDynamic(self.item_juPage)
+        self.itemPromotiton()
 
     # Day
     def antPageDay(self, val):
@@ -728,6 +732,9 @@ class JHSItem():
         self.item_pageData,self.item_groupCatId,self.item_groupCatName,self.item_groupCat_url,self.item_subNavName,self.item_position,self.crawling_begintime = val
         self.itemParser()
         self.itemConfig()
+        self.item_pages['item-home'] = (self.item_ju_url, self.item_juPage)
+        # 商品关注人数, 商品销售数量, 商品库存
+        self.itemDynamic(self.item_juPage)
         self.itemPromotiton()
         self.itemStatus()
 
@@ -753,7 +760,7 @@ class JHSItem():
         self.itemLock(self.item_juPage)
 
         # 商品关注人数, 商品销售数量, 商品库存
-        #self.itemDynamic(self.item_juPage)
+        self.itemDynamic(self.item_juPage)
         if self.item_soldCount == '' or self.item_stock == '':
             print '# item not get soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
         #    # 聚划算商品页信息
