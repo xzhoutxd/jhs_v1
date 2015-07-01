@@ -287,7 +287,8 @@ class JHSItemM(MyThread):
                         self.mysqlAccess.updateJhsItem(updateSql)
 
                 # 存网页
-                if item and (self._q_type == 'main' or self._q_type == 'update'):
+                #if item and (self._q_type == 'main' or self._q_type == 'update'):
+                if item:
                     _pages = item.outItemPage(self._q_type)
                     self.mongofsAccess.insertJHSPages(_pages)
 
