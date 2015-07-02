@@ -40,7 +40,7 @@ class JHSWorker():
         self.jsonpage      = Jsonpage()
 
         # 抓取设置
-        self.crawler       = TBCrawler()
+        self.crawler = TBCrawler()
 
         # 页面模板解析
         self.brand_temp    = JHSBrandTEMP()
@@ -140,7 +140,7 @@ class JHSWorker():
             Common.traceback_log()
 
     # CAT queue
-    def run_cat(self, msg, _val):
+    def run_cat_old(self, msg, _val):
         if self._crawl_type == 'home':
             self.parse_homepage(msg, _val)
         elif self._crawl_type == 'main':
@@ -168,25 +168,70 @@ class JHSWorker():
         c_url, c_id, c_name, refers = msg_val
         a_val = (c_id, c_name)
         print '# category',c_name,c_id
-        bResult_list = []
-        """
-        c_url  = msg["url"]
-        a_val  = (msg["id"],msg["name"])
-        refers = msg["refers"]
-        print '# category',msg["id"],msg["name"]
-        """
-        # get json
-        bResult_list = self.jsonpage.get_jsonPage(c_url,refers,a_val)
+        self.get_actjson(c_url, refers, a_val, _val)
 
-        # parse json
-        if bResult_list and bResult_list != []:
-            act_valList = self.jsonpage.parser_brandjson(bResult_list,_val)
+    def run_cat(self, msg, _val):
+        msg_val = msg["val"]
+        c_url, c_id, c_name, refers = msg_val
+        a_val = (c_id, c_name)
+        print '# category',c_name,c_id
+        page = self.crawler.getData(c_url, refers)
+        page_val = (page,c_id,c_name)
+        ajax_url_list = self.getAjaxurlList(page_val)
+        if len(ajax_url_list) > 0:
+            #self.get_jsonacts(ajax_url_list, a_val, refers, _val)
+            # process ajax url list
+            for c_url in ajax_url_list:
+                self.get_actjson(c_url, refers, a_val, _val)
+
+    def get_actjson(self, c_url, refers, a_val, _val):
+        Result_list = self.jsonpage.get_jsonPage(c_url,refers,a_val)
+        if Result_list and len(Result_list) > 0:
+            # parser act result
+            act_valList = self.jsonpage.parser_brandjson(Result_list,_val)
             if act_valList != []:
                 print '# get brand act num:',len(act_valList)
-                #self.items.extend([act_valList[0]])
                 self.items.extend(act_valList)
             else:
                 print '# err: not get brandjson parse val list.'
+
+    # get json ajax url
+    def getAjaxurlList(self, page_val):
+        url_list = []
+        page, c_id, c_name = page_val
+        p = re.compile(r'<.+?data-ajaxurl="(.+?)".+?>(.+?)</div>',flags=re.S)
+        i = 0
+        for a_info in p.finditer(page):
+            c_subNav = c_name
+            a_url = a_info.group(1).replace('amp;','')
+            info = a_info.group(2)
+            m = re.search(r'<span class="l-f-tbox">(.+?)</span>',info,flags=re.S)
+            if m:
+                c_subNav = m.group(1).strip()
+            #url_list.append((a_url,refers,a_val))
+            url_list.append(a_url)
+            i += 1
+        return url_list
+
+    # get act json list in category page from ajax url
+    def get_jsonacts(self, ajax_url_list, a_val, refers, _val):
+        # act val list
+        act_list = []
+        # process ajax url list
+        item_json_index = 0
+        item_soldout_num = 0
+        for c_url in ajax_url_list:
+            Result_list = self.jsonpage.get_jsonPage(c_url,refers,a_val)
+            item_result_list = []
+            act_result_list = []
+            if Result_list and len(Result_list) > 0:
+                # parser act result
+                act_valList = self.jsonpage.parser_brandjson(Result_list,_val)
+                if act_valList != []:
+                    print '# get brand act num:',len(act_valList)
+                    self.items.extend(act_valList)
+                else:
+                    print '# err: not get brandjson parse val list.'
 
     # ACT queue
     def run_act(self, msg):
@@ -200,30 +245,41 @@ class JHSWorker():
         elif self._crawl_type == 'check':
             act_obj = JHSAct()
             act_obj.antPageCheck(msg_val)
+        elif self._crawl_type == 'position':
+            act_obj = JHSAct()
+            act_obj.antPageParser(msg_val)
         print '# act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
         act_keys = [self.worker_type, str(act_obj.brandact_id)]
         prev_act = self.redisAccess.read_jhsact(act_keys)
 
-        # 是否需要抓取商品
-        if act_obj and act_obj.crawling_confirm != 2:
-            items_list = []
-            # 只取非俪人购商品
-            if int(act_obj.brandact_sign) != 3:
-                if act_obj.crawling_confirm == 0:
-                    #更新马上开团活动中商品位置
-                    self.update_actItems_position(act_obj)
-                # 多线程抓商品
-                items_list = self.run_actItems(act_obj, prev_act)
+        if self._crawl_type == 'position':
+            brandact_id,brandact_name,brandact_url,brandact_sign,val = act_obj.outTupleParse()
+            if int(brandact_sign) != 3:
+                print '# insert activity position, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
+                self.mysqlAccess.insertJhsActPosition_n(val)
             else:
-                print '# ladygo activity id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
-
-            print '# pro act start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            # 处理活动信息
-            self.procAct(act_obj, prev_act, items_list)
-            print '# pro act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                print '# id:%s name:%s sign:%s is ladygo..'%(act_obj.brandact_id, act_obj.brandact_name, str(brandact_sign))
         else:
-           print '# Already start activity, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name) 
+            # 是否需要抓取商品
+            if act_obj and act_obj.crawling_confirm != 2:
+                items_list = []
+                # 只取非俪人购商品
+                if int(act_obj.brandact_sign) != 3:
+                    if act_obj.crawling_confirm == 0:
+                        #更新马上开团活动中商品位置
+                        self.update_actItems_position(act_obj)
+                    # 多线程抓商品
+                    items_list = self.run_actItems(act_obj, prev_act)
+                else:
+                    print '# ladygo activity id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
+
+                print '# pro act start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                # 处理活动信息
+                self.procAct(act_obj, prev_act, items_list)
+                print '# pro act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            else:
+               print '# Already start activity, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name) 
 
     #更新马上开团活动中商品位置
     def update_actItems_position(self, act):
@@ -316,7 +372,7 @@ class JHSWorker():
     def putActDB(self, act, prev_act):
         # 预热信息
         if self._crawl_type == 'main':
-            self.mysqlAccess.insertJhsActComing(act.outSqlForComing()) 
+            self.mysqlAccess.insertJhsActComing(act.outSql()) 
 
         # redis
         self.mergeAct(act, prev_act)
@@ -335,8 +391,8 @@ class JHSWorker():
 
         # mongo
         # 存网页
-        _pages = act.outItemPage(self._crawl_type)
-        self.mongofsAccess.insertJHSPages(_pages)
+        #_pages = act.outItemPage(self._crawl_type)
+        #self.mongofsAccess.insertJHSPages(_pages)
 
     # To process activity
     def procAct(self, act, prev_act, items_list):

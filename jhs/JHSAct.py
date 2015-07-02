@@ -30,9 +30,10 @@ class JHSAct():
         # 类别
         self.brandact_platform = '聚划算-pc' # 品牌团所在平台
         self.brandact_channel = '品牌闪购' # 品牌团所在频道
-        self.brandact_catgoryId = 0 # 品牌团所在类别Id
-        self.brandact_catgoryName = '' # 品牌团所在类别Name
+        self.brandact_categoryId = 0 # 品牌团所在类别Id
+        self.brandact_categoryName = '' # 品牌团所在类别Name
         self.brandact_position = 0 # 品牌团所在类别位置
+        self.brandact_front_categoryId = 0 # 品牌团所在前端类别Id
 
         # 是否在首页展示
         self.home_brands = {} # 首页品牌团信息
@@ -86,9 +87,9 @@ class JHSAct():
         self.brandact_pagedata = page
         self.brandact_pages['act-init'] = ('', page)
         # 品牌团所在类别Id
-        self.brandact_catgoryId = catId
+        self.brandact_categoryId = catId
         # 品牌团所在类别Name
-        self.brandact_catgoryName = catName
+        self.brandact_categoryName = catName
         # 品牌团所在类别位置
         self.brandact_position = position
         # 本次抓取开始时间
@@ -106,9 +107,9 @@ class JHSAct():
         self.brandact_pagedata = page
         self.brandact_pages['act-init'] = ('', page)
         # 品牌团所在类别Id
-        self.brandact_catgoryId = catId
+        self.brandact_categoryId = catId
         # 品牌团所在类别Name
-        self.brandact_catgoryName = catName
+        self.brandact_categoryName = catName
         # 品牌团所在类别位置
         self.brandact_position = position
         # 本次抓取开始时间
@@ -196,7 +197,7 @@ class JHSAct():
                 self.brandact_brandId = b_baseInfo['brandId']
             if b_baseInfo.has_key('sgFrontCatId') and b_baseInfo['sgFrontCatId']:
                 # 品牌团所在类别Id
-                self.brandact_catgoryId = b_baseInfo['sgFrontCatId']
+                self.brandact_front_categoryId = b_baseInfo['sgFrontCatId']
 
     # Json dict materials
     def item_materialsDict(self, b_materials):
@@ -330,7 +331,7 @@ class JHSAct():
             m = re.search(r'"sgFrontCatId":(\d+)', b_baseInfo, flags=re.S)
             if m:
                 # 品牌团所在类别Id
-                self.brandact_catgoryId = m.group(1)
+                self.brandact_front_categoryId = m.group(1)
 
     # Json string materials
     def item_materialsString(self, b_materials):
@@ -779,9 +780,6 @@ class JHSAct():
         page, catId, catName, position, begin_time = val
         self.initItem(page, catId, catName, position, begin_time)
         self.itemConfig()
-        # 保存html文件
-        page_datepath = 'act/parser/' + time.strftime("%Y/%m/%d/%H/", time.localtime(self.crawling_begintime))
-        self.writeLog(page_datepath)
 
     # 输出活动的网页
     def outItemPage(self,crawl_type):
@@ -834,11 +832,13 @@ class JHSAct():
 
     # 正点开团
     def outSql(self):
-        return (Common.time_s(self.crawling_time),str(self.brandact_id),str(self.brandact_catgoryId),self.brandact_catgoryName,str(self.brandact_position),self.brandact_platform,self.brandact_channel,self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_desc,Common.fix_url(self.brandact_logopic_url),Common.fix_url(self.brandact_enterpic_url),self.brandact_status,str(self.brandact_sign),self.brandact_other_ids,str(self.brandact_sellerId),self.brandact_sellerName,str(self.brandact_shopId),self.brandact_shopName,self.brandact_discount,str(self.brandact_soldCount),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_brandId),self.brandact_brand,str(self.brandact_inJuHome),str(self.brandact_juHome_position),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
+        #return (Common.time_s(self.crawling_time),str(self.brandact_id),str(self.brandact_categoryId),self.brandact_categoryName,str(self.brandact_front_categoryId),str(self.brandact_position),self.brandact_platform,self.brandact_channel,self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_desc,Common.fix_url(self.brandact_logopic_url),Common.fix_url(self.brandact_enterpic_url),self.brandact_status,str(self.brandact_sign),self.brandact_other_ids,str(self.brandact_sellerId),self.brandact_sellerName,str(self.brandact_shopId),self.brandact_shopName,self.brandact_discount,str(self.brandact_soldCount),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_brandId),self.brandact_brand,str(self.brandact_inJuHome),str(self.brandact_juHome_position),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
+        return (Common.time_s(self.crawling_time),str(self.brandact_id),str(self.brandact_front_categoryId),self.brandact_categoryName,str(self.brandact_categoryId),str(self.brandact_position),self.brandact_platform,self.brandact_channel,self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_desc,Common.fix_url(self.brandact_logopic_url),Common.fix_url(self.brandact_enterpic_url),self.brandact_status,str(self.brandact_sign),self.brandact_other_ids,str(self.brandact_sellerId),self.brandact_sellerName,str(self.brandact_shopId),self.brandact_shopName,self.brandact_discount,str(self.brandact_soldCount),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_brandId),self.brandact_brand,str(self.brandact_inJuHome),str(self.brandact_juHome_position),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
 
     # 即将上线
     def outSqlForComing(self):
-        return (Common.time_s(self.crawling_time),str(self.brandact_id),str(self.brandact_catgoryId),self.brandact_catgoryName,str(self.brandact_position),self.brandact_platform,self.brandact_channel,self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_desc,Common.fix_url(self.brandact_logopic_url),Common.fix_url(self.brandact_enterpic_url),self.brandact_status,str(self.brandact_sign),self.brandact_other_ids,str(self.brandact_sellerId),self.brandact_sellerName,str(self.brandact_shopId),self.brandact_shopName,self.brandact_discount,str(self.brandact_soldCount),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_brandId),self.brandact_brand,str(self.brandact_inJuHome),str(self.brandact_juHome_position),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
+        #return (Common.time_s(self.crawling_time),str(self.brandact_id),str(self.brandact_categoryId),self.brandact_categoryName,str(self.brandact_front_categoryId),str(self.brandact_position),self.brandact_platform,self.brandact_channel,self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_desc,Common.fix_url(self.brandact_logopic_url),Common.fix_url(self.brandact_enterpic_url),self.brandact_status,str(self.brandact_sign),self.brandact_other_ids,str(self.brandact_sellerId),self.brandact_sellerName,str(self.brandact_shopId),self.brandact_shopName,self.brandact_discount,str(self.brandact_soldCount),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_brandId),self.brandact_brand,str(self.brandact_inJuHome),str(self.brandact_juHome_position),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
+        return (Common.time_s(self.crawling_time),str(self.brandact_id),str(self.brandact_front_categoryId),self.brandact_categoryName,str(self.brandact_categoryId),str(self.brandact_position),self.brandact_platform,self.brandact_channel,self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_desc,Common.fix_url(self.brandact_logopic_url),Common.fix_url(self.brandact_enterpic_url),self.brandact_status,str(self.brandact_sign),self.brandact_other_ids,str(self.brandact_sellerId),self.brandact_sellerName,str(self.brandact_shopId),self.brandact_shopName,self.brandact_discount,str(self.brandact_soldCount),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_brandId),self.brandact_brand,str(self.brandact_inJuHome),str(self.brandact_juHome_position),Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.crawling_beginDate,self.crawling_beginHour)
 
     # 更新活动
     def outSqlForUpdate(self):
@@ -860,13 +860,13 @@ class JHSAct():
         return (self.brandact_id, self.brandact_name, Common.fix_url(self.brandact_url), self.brandact_itemVal_list, Common.time_s(self.crawling_time))
 
     def outTupleForComing(self):
-        return (self.crawling_confirm,self.outSqlForComing())
+        return (self.crawling_confirm,self.outSql())
 
     def outTupleParse(self):
-        return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,str(self.brandact_position),str(self.brandact_catgoryId),self.brandact_catgoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate))
+        return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_sign,(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,str(self.brandact_position),str(self.brandact_categoryId),self.brandact_categoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate,self.crawling_beginHour))
 
     def outTupleForRedis(self):
-        return (Common.time_s(self.crawling_time),str(self.brandact_catgoryId),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_sign),self.brandact_other_ids,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_itemids)
+        return (Common.time_s(self.crawling_time),str(self.brandact_categoryId),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_sign),self.brandact_other_ids,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_itemids)
 
 if __name__ == '__main__':
     pass
