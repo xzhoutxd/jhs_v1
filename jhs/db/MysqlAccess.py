@@ -191,7 +191,7 @@ class MysqlAccess():
         except Exception, e:
             print '# select Jhs alive items for hour exception:', e
 
-     # 查找没有开团的商品
+    # 查找没有开团的商品
     def selectJhsItemsNotStart(self, args):
         # (当前时间小于开始时间,)
         try:
