@@ -134,7 +134,7 @@ class JHSItemM(MyThread):
         if not _data: return
         _retry, _val = _data
         _retry += 1
-        if _retry < Config.crawl_retry:
+        if _retry < Config.item_crawl_retry:
             _data = (_retry, _val)
             self.put_q(_data)
         else:
