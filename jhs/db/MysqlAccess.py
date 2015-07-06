@@ -191,6 +191,15 @@ class MysqlAccess():
         except Exception, e:
             print '# select Jhs alive items for hour exception:', e
 
+     # 查找没有开团的商品
+    def selectJhsItemsNotStart(self, args):
+        # (当前时间小于开始时间,)
+        try:
+            sql = 'select b.act_id,b.act_name,a.item_juid,a.act_id,a.item_ju_url,b.act_url,a.item_id from nd_jhs_parser_item_info as a join nd_jhs_parser_activity as b on a.act_id = b.act_id where a.start_time > %s'
+            return self.jhs_db.select(sql, args)
+        except Exception, e:
+            print '# select Jhs not start items exception:', e
+
     # 每天抓取商品
     def insertJhsItemForDay(self, args_list):
         try:
