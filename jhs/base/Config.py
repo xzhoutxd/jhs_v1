@@ -124,8 +124,8 @@ g_crawledTime = Common.str2timestamp('2000-01-01 00:00:00')
 crawl_retry = 10
 home_crawl_retry = 30
 json_crawl_retry = 30
-act_crawl_retry = 10
-item_crawl_retry = 10
+act_crawl_retry = 5
+item_crawl_retry = 3
 
 # 并发线程值
 act_max_th = 10

@@ -37,7 +37,8 @@ if __name__ == '__main__':
     # 附加的信息
     a_val = None
     if obj == 'item':
-        if crawl_type == 'update' or crawl_type == 'day' or crawl_type == 'hour':
+        #if crawl_type == 'update' or crawl_type == 'day' or crawl_type == 'hour' or crawl_type == 'check':
+        if crawl_type in ['update','day','hour','check']:
             a_val = (begin_time,)
     m.createProcess((obj, crawl_type, a_val))
     m.run()

@@ -120,7 +120,7 @@ class JHSItemM(MyThread):
                     item.item_endtime       = Common.str2timestamp(prev_item["end_time"])
 
     # To put item redis db
-    def putActDB(self, item):
+    def putItemDB(self, item):
         # redis
         keys = [self.worker_type, str(item.item_juId)]
         prev_item = self.redisAccess.read_jhsitem(keys)
@@ -226,7 +226,7 @@ class JHSItemM(MyThread):
                     #print '# To crawl activity item val : ', Common.now_s()
                     # 汇聚
                     # redis
-                    self.putActDB(item)
+                    self.putItemDB(item)
                     self.push_back(self.items, item.outTuple())
                     # 入库
                     iteminfoSql = item.outTuple()
@@ -241,7 +241,7 @@ class JHSItemM(MyThread):
                     #print '# Day To crawl activity item val : ', Common.now_s()
                     # 汇聚
                     # redis
-                    #self.putActDB(item)
+                    #self.putItemDB(item)
                     #self.push_back(self.items, item.outTupleDay())
                     # 入库
                     #updateSql = item.outSqlForUpdate()
@@ -260,7 +260,7 @@ class JHSItemM(MyThread):
                     #print '# Hour To crawl activity item val : ', Common.now_s()
                     # 汇聚
                     # redis
-                    self.putActDB(item)
+                    self.putItemDB(item)
                     self.push_back(self.items, item.outTupleHour())
                     # 入库
                     updateSql = item.outSqlForUpdate()
@@ -279,9 +279,24 @@ class JHSItemM(MyThread):
                     item.antPageUpdate(_val)
                     # 汇聚
                     # redis
-                    self.putActDB(item)
+                    self.putItemDB(item)
                     self.push_back(self.items, item.outSqlForUpdate())
 
+                    updateSql = item.outSqlForUpdate()
+                    if updateSql:
+                        self.mysqlAccess.updateJhsItem(updateSql)
+                elif self._q_type == 'check':
+                    # check商品实例
+                    item = JHSItem()
+                    _val = _data[1]
+                    if self.a_val: _val = _val + self.a_val
+                    item.antPageUpdate(_val)
+                    #print '# Check To crawl activity item val : ', Common.now_s()
+                    # 汇聚
+                    # redis
+                    self.putItemDB(item)
+                    self.push_back(self.items, item.outSqlForUpdate())
+                    # 入库
                     updateSql = item.outSqlForUpdate()
                     if updateSql:
                         self.mysqlAccess.updateJhsItem(updateSql)
