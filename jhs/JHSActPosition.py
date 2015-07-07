@@ -126,7 +126,9 @@ class JHSActPosition():
         item_list = m_Obj.items
         for b in item_list:
             act_num += 1
-            brandact_id,brandact_name,brandact_url,val = b
+            brandact_id,brandact_name,brandact_url,brandact_sign,val = b
+            if int(brandact_sign) == 3:
+                continue
             # 去重
             if brandact_id_dict.has_key(str(brandact_id)):
                 repeatact_num += 1
