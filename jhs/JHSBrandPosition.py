@@ -17,8 +17,8 @@ from JHSCatQ import JHSCatQ
 from JHSActQ import JHSActQ
 from JHSWorker import JHSWorker
 
-class JHSBrand():
-    '''A class of JHS category channel'''
+class JHSBrandPosition():
+    '''A class of JHS brand act position'''
     def __init__(self, m_type):
         # 抓取设置
         self.crawler = RetryCrawler()
@@ -26,11 +26,14 @@ class JHSBrand():
         # DB
         self.mysqlAccess   = MysqlAccess()     # mysql access
 
-        # cat queue
-        self.cat_queue = JHSQ('cat','main')
+        # cat homeposition queue
+        self.home_queue = JHSQ('cat', 'homeposition')
+
+        # cat position queue
+        self.cat_queue = JHSQ('cat','position')
 
         # act queue
-        self.act_queue = JHSQ('act','main')
+        self.act_queue = JHSQ('act','position')
 
         self.work = JHSWorker()
 
@@ -68,6 +71,13 @@ class JHSBrand():
         try:
             # 主机器需要配置redis队列
             if self.m_type == 'm':
+                # 清空分类类表也home url redis队列
+                self.home_queue.clearQ()
+                # 保存到redis队列
+                self.home_queue.putlistQ([(Config.ju_brand_home, Config.ju_home)])
+                print '# cat homeposition queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+                # 商品团分类页面
                 category_list = self.mysqlAccess.selectJhsGroupItemCategory()
                 if not category_list or len(category_list) == 0:
                     category_list = self.category_list
@@ -82,22 +92,27 @@ class JHSBrand():
 
                     # 清空act redis队列
                     self.act_queue.clearQ()
-                    print '# category queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                    print '# category position queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 else:
                     print '# not find category...'
 
+            # 类目json url list
+            obj = 'cat'
+            crawl_type = 'homeposition'
+            self.work.process(obj,crawl_type)
+            # json url list
+            json_val_list = self.work.items
+            if json_val_list and len(json_val_list) > 0:
+                # 保存到redis队列
+                self.cat_queue.putlistQ(json_val_list)
+                print '# cat homeposition queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
             # 类目的活动Json
             obj = 'cat'
-            crawl_type = 'main'
+            crawl_type = 'position'
             # 获取还没有开团的活动id
-            val = (Common.time_s(Common.now()),)
-            acts = self.mysqlAccess.selectJhsActNotStart(val)
-            brandact_id_list = []
-            if acts:
-                for act in acts:
-                    brandact_id_list.append(str(act[1]))
-            _val = (self.begin_time, brandact_id_list)
-            self.work.process(obj,crawl_type,_val)
+            a_val = (self.begin_time,)
+            self.work.process(obj,crawl_type,a_val)
 
             # 活动数据
             act_val_list = self.work.items
@@ -108,61 +123,20 @@ class JHSBrand():
             print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             #if self.m_type == 'm':
-                #val = (Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -1))
-                ## 删除Redis中上个小时结束的活动
-                #print '# end acts num:',len(_acts)
-                #_acts = self.mysqlAccess.selectJhsActEndLastOneHour(val)
-                #self.work.delAct(_acts)
-                ## 删除Redis中上个小时结束的商品
-                #_items = self.mysqlAccess.selectJhsItemEndLastOneHour(val)
-                #print '# end items num:',len(_items)
-                #self.work.delItem(_items)
+                # 删除Redis中结束活动
         except Exception as e:
             print '# antpage error :',e
             Common.traceback_log()
 
-    # 商品团频道
-    def categoryListTEMP(self):
-        page = self.crawler.getData(Config.ju_home_today, Config.ju_home)
-        if not page or page == '': print '# not get today page'
-        category_list = []
-        m = re.search(r'<div class="J_CatLeft layout-left">.+?<table>(.+?)</table>.+?</div>',page,flags=re.S)
-        if m:
-            category_list = self.categoryListType1(m.group(1))
-        else:
-            m = re.search(r'<div class="catbg">\s+<div class="ju-wrapper">\s+<div class="cat-menu-h".+?>.+?<ul class="clearfix">(.+?)</ul>',page,flags=re.S)
-
-            if m:
-                category_list = self.categoryListType2(m.group(1))
-
-        return category_list
-
-    def categoryListType1(self,page):
-        category_list = []
-        m = re.search(r'<tr class="h2">.+?</tr>(.+?)<tr class="h2">',page,flags=re.S)
-        if m:
-            cate_list = m.group(1)
-            p = re.compile(r'<a.+?href="(.+?)".+?>(.+?)</a>',flags=re.S)
-            for cate in p.finditer(cate_list):
-                category_list.append((cate.group(1),cate.group(2).strip()))
-        return category_list
-    
-    def categoryListType2(self,page):
-        category_list = []
-        p = re.compile(r'<a.+?href="(.+?)".+?>(.+?)</a>',flags=re.S)
-        for cate in p.finditer(page):
-            category_list.append((cate.group(1),cate.group(2).strip()))
-        return category_list
-
 if __name__ == '__main__':
     args = sys.argv
-    #args = ['JHSBrand','m']
+    #args = ['JHSBrandPosition','m']
     if len(args) < 2:
-        print '#err not enough args for JHSBrand...'
+        print '#err not enough args for JHSBrandPosition...'
         exit()
     # 是否是分布式中主机
     m_type = args[1]
-    j = JHSBrand(m_type)
+    j = JHSBrandPosition(m_type)
     print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     j.antPage()
     time.sleep(1)

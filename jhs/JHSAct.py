@@ -34,6 +34,8 @@ class JHSAct():
         self.brandact_categoryName = '' # 品牌团所在类别Name
         self.brandact_position = 0 # 品牌团所在类别位置
         self.brandact_front_categoryId = 0 # 品牌团所在前端类别Id
+        self.category_type = '0' # 品牌团分类的类型,'0':默认 '1':品牌闪购9分类 '2':商品团16分类
+        self.subNavName = '' # 活动所在分类下子导航Name
 
         # 是否在首页展示
         self.home_brands = {} # 首页品牌团信息
@@ -133,16 +135,6 @@ class JHSAct():
                 self.itemString()
         else:
             self.itemDict()
-
-        # 判断是否在首页推广
-        if self.home_brands != {} and self.brandact_id != '' and self.brandact_url != '':
-            key1, key2 = str(self.brandact_id), self.brandact_url.split('?')[0]
-            if self.home_brands.has_key(key1):
-                self.brandact_inJuHome = 1
-                self.brandact_juHome_position = self.home_brands[key1]['position']
-            elif self.home_brands.has_key(key2):
-                self.brandact_inJuHome = 1
-                self.brandact_juHome_position = self.home_brands[key2]['position']
 
     # Json dict
     def itemDict(self):
@@ -777,8 +769,11 @@ class JHSAct():
 
     # 解析品牌团活动数据
     def antPageParser(self, val):
-        page, catId, catName, position, begin_time = val
-        self.initItem(page, catId, catName, position, begin_time)
+        self.brandact_pagedata,self.brandact_categoryId,self.brandact_categoryName,self.brandact_position,self.category_type,self.subNavName,self.crawling_begintime = val
+        # 本次抓取开始日期
+        self.crawling_beginDate = time.strftime("%Y-%m-%d", time.localtime(self.crawling_begintime))
+        # 本次抓取开始小时
+        self.crawling_beginHour = time.strftime("%H", time.localtime(self.crawling_begintime))
         self.itemConfig()
 
     # 输出活动的网页
@@ -856,6 +851,9 @@ class JHSAct():
 
     def outTupleForComing(self):
         return (self.crawling_confirm,self.outSql())
+
+    def outTupleForPosition(self):
+        return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_sign,self.brandact_status,(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.category_type,self.subNavName,str(self.brandact_position),str(self.brandact_categoryId),self.brandact_categoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate,self.crawling_beginHour))
 
     def outTupleParse(self):
         return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_sign,(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,str(self.brandact_position),str(self.brandact_categoryId),self.brandact_categoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate))

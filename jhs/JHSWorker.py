@@ -74,6 +74,9 @@ class JHSWorker():
         # giveup items
         self.giveup_items  = []
 
+        # giveup msg val
+        self.giveup_val = None
+
     # To dial router
     def dialRouter(self, _type, _obj):
         try:
@@ -105,7 +108,10 @@ class JHSWorker():
     def crawlPage(self, _obj, _crawl_type, _key, msg, _val):
         try:
             if _obj == 'cat':
-                self.run_cat(msg, _val)
+                if _crawl_type == 'home' or _crawl_type == 'homeposition':
+                    self.run_cat_home(msg, _val)
+                else:
+                    self.run_cat(msg, _val)
             elif _obj == 'act':
                 self.run_act(msg)
             elif _obj == 'item':
@@ -131,6 +137,8 @@ class JHSWorker():
             time.sleep(random.uniform(10,30))
         except Common.RetryException as e:
             print '# Retry exception:',e
+            if self.giveup_val:
+                msg['val'] = self.giveup_val
             self.crawlRetry(_key,msg)
             time.sleep(random.uniform(20,30))
         except Exception as e:
@@ -139,14 +147,8 @@ class JHSWorker():
             time.sleep(random.uniform(10,30))
             Common.traceback_log()
 
-    # CAT queue
-    def run_cat_old(self, msg, _val):
-        if self._crawl_type == 'home':
-            self.parse_homepage(msg, _val)
-        elif self._crawl_type == 'main':
-            self.get_cat_json(msg, _val)
-
-    def parse_homepage(self, msg, _val):
+    #def parse_homepage(self, msg, _val):
+    def run_cat_home(self, msg, _val):
         msg_val = msg["val"]
         _url, refers = msg_val
         print '# brand home:',_url
@@ -161,30 +163,56 @@ class JHSWorker():
         c_url_val_list = self.brand_temp.temp(page)
         for c_url_val in c_url_val_list:
             c_url, c_name, c_id = c_url_val
-            self.items.append((Common.fix_url(c_url),c_id,c_name,Config.ju_brand_home))
+            self.items.append((Common.fix_url(c_url),c_id,c_name,Config.ju_brand_home,Config.JHS_Brand))
 
-    def get_cat_json(self, msg, _val):
-        msg_val = msg["val"]
-        c_url, c_id, c_name, refers = msg_val
-        a_val = (c_id, c_name)
-        print '# category',c_name,c_id
-        self.get_actjson(c_url, refers, a_val, _val)
+        if self._crawl_type == 'homeposition':
+            top_acts = self.brand_temp.activityTopbrandTemp(page)
+            self.save_top_acts(top_acts)
+
+    def save_top_acts(self, top_acts):
+        if top_acts:
+            for key in top_acts.keys():
+                act = top_acts[key]
+                c_time, act_id, act_name, act_position, act_url, f_id, f_name, sub_nav = Common.now(), -1, '', -1, '', 0, '', ''
+                c_date, c_hour = time.strftime("%Y-%m-%d", time.localtime(c_time)), time.strftime("%H", time.localtime(c_time))
+                if act.has_key('act_id'):
+                    act_id = act["act_id"]
+                if act.has_key('position'):
+                    act_position = act["position"]
+                if act.has_key('url'):
+                    act_url = act["url"]
+                if act.has_key('datatype'):
+                    f_name = act["datatype"]
+                val = (Common.time_s(c_time),act_id,act_name,act_url,Config.JHS_Brand,sub_nav,act_position,f_id,f_name,'',c_date,c_hour)
+                self.mysqlAccess.insertJhsActPosition_hour(val)
 
     def run_cat(self, msg, _val):
         msg_val = msg["val"]
-        c_url, c_id, c_name, refers = msg_val
-        a_val = (c_id, c_name)
+        c_url, c_id, c_name, refers, pagetype = msg_val
         print '# category',c_name,c_id
+        if pagetype == Config.JHS_Brand:
+            a_val = (c_id, c_name)
+            self.get_actjson(c_url, refers, a_val, _val, pagetype)
+        elif pagetype == Config.JHS_GroupItem:
+            self.get_cat_jsons(c_url, c_id, c_name, refers, _val, pagetype)
+        else:
+            print '# not get category pagetype...'
+
+    def get_cat_jsons(self, c_url, c_id, c_name, refers, _val, pagetype):
+        a_val = (c_id, c_name)
         page = self.crawler.getData(c_url, refers)
         page_val = (page,c_id,c_name)
         ajax_url_list = self.getAjaxurlList(page_val)
         if len(ajax_url_list) > 0:
-            #self.get_jsonacts(ajax_url_list, a_val, refers, _val)
             # process ajax url list
-            for c_url in ajax_url_list:
-                self.get_actjson(c_url, refers, a_val, _val)
+            for url_val in ajax_url_list:
+                c_url,c_subNav = url_val
+                self.get_actjson(c_url, refers, a_val, _val, pagetype, c_subNav)
 
-    def get_actjson(self, c_url, refers, a_val, _val):
+    def get_actjson(self, c_url, refers, a_val, _val, pagetype, c_subNav=''):
+        if self._crawl_type == 'position':
+            _val = (pagetype,c_subNav) + _val
+
         Result_list = self.jsonpage.get_jsonPage(c_url,refers,a_val)
         if Result_list and len(Result_list) > 0:
             # parser act result
@@ -199,39 +227,24 @@ class JHSWorker():
     def getAjaxurlList(self, page_val):
         url_list = []
         page, c_id, c_name = page_val
-        p = re.compile(r'<.+?data-ajaxurl="(.+?)".+?>(.+?)</div>',flags=re.S)
+        p = re.compile(r'<.+?id="(.+?)".+?data-ajaxurl="(.+?)".+?>(.+?)</div>',flags=re.S)
         i = 0
         for a_info in p.finditer(page):
-            c_subNav = c_name
-            a_url = a_info.group(1).replace('amp;','')
-            info = a_info.group(2)
-            m = re.search(r'<span class="l-f-tbox">(.+?)</span>',info,flags=re.S)
+            c_subNav = ''
+            f_id = a_info.group(1)
+            a_url = a_info.group(2).replace('amp;','')
+            info = a_info.group(3)
+            m = re.search(r'<span class="l-f-tbox">(.+?)</span>', info, flags=re.S)
             if m:
                 c_subNav = m.group(1).strip()
+            if c_subNav == '':
+                m = re.search(r'<td.+?data-target="%s".+?>(.+?)</td>' % f_id, page, flags=re.S)
+                if m:
+                    c_subNav = re.sub(r'<.+?>','',m.group(1))
             #url_list.append((a_url,refers,a_val))
-            url_list.append(a_url)
+            url_list.append((a_url,c_subNav))
             i += 1
         return url_list
-
-    # get act json list in category page from ajax url
-    def get_jsonacts(self, ajax_url_list, a_val, refers, _val):
-        # act val list
-        act_list = []
-        # process ajax url list
-        item_json_index = 0
-        item_soldout_num = 0
-        for c_url in ajax_url_list:
-            Result_list = self.jsonpage.get_jsonPage(c_url,refers,a_val)
-            item_result_list = []
-            act_result_list = []
-            if Result_list and len(Result_list) > 0:
-                # parser act result
-                act_valList = self.jsonpage.parser_brandjson(Result_list,_val)
-                if act_valList != []:
-                    print '# get brand act num:',len(act_valList)
-                    self.items.extend(act_valList)
-                else:
-                    print '# err: not get brandjson parse val list.'
 
     # ACT queue
     def run_act(self, msg):
@@ -250,17 +263,14 @@ class JHSWorker():
             act_obj.antPageParser(msg_val)
         print '# act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-        act_keys = [self.worker_type, str(act_obj.brandact_id)]
-        prev_act = self.redisAccess.read_jhsact(act_keys)
-
         if self._crawl_type == 'position':
-            brandact_id,brandact_name,brandact_url,brandact_sign,val = act_obj.outTupleParse()
-            if int(brandact_sign) != 3:
+            brandact_id,brandact_name,brandact_url,brandact_sign,brandact_status,val = act_obj.outTupleForPosition()
+            if int(brandact_sign) != 3 and brandact_status != '' and brandact_status != 'blank':
                 print '# insert activity position, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
-                self.mysqlAccess.insertJhsActPosition_n(val)
-            else:
-                print '# id:%s name:%s sign:%s is ladygo..'%(act_obj.brandact_id, act_obj.brandact_name, str(brandact_sign))
+                self.mysqlAccess.insertJhsActPosition_hour(val)
         else:
+            act_keys = [self.worker_type, str(act_obj.brandact_id)]
+            prev_act = self.redisAccess.read_jhsact(act_keys)
             # 是否需要抓取商品
             if act_obj and act_obj.crawling_confirm != 2:
                 items_list = []
@@ -279,7 +289,19 @@ class JHSWorker():
                 self.procAct(act_obj, prev_act, items_list)
                 print '# pro act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             else:
-               print '# Already start activity, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name) 
+                self.update_startact(act_obj, prev_act)
+                print '# Already start activity, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name) 
+
+    # 更新开团后活动
+    def update_startact(self, act, prev_act):
+        if act.brandact_endtime and act.brandact_endtime != 0.0:
+            end_time_s = Common.time_s(float(act.brandact_endtime)/1000)
+            if prev_act and end_time_s != prev_act['end_time']:
+                prev_act['end_time'] = end_time_s
+                # redis
+                keys = [self.worker_type, str(act.brandact_id)]
+                self.redisAccess.write_jhsact(keys, prev_act)
+                self.mysqlAccess.updateJhsActEndtime((end_time_s,str(act_obj.brandact_id)))
 
     #更新马上开团活动中商品位置
     def update_actItems_position(self, act):
@@ -391,8 +413,8 @@ class JHSWorker():
 
         # mongo
         # 存网页
-        #_pages = act.outItemPage(self._crawl_type)
-        #self.mongofsAccess.insertJHSPages(_pages)
+        _pages = act.outItemPage(self._crawl_type)
+        self.mongofsAccess.insertJHSPages(_pages)
 
     # To process activity
     def procAct(self, act, prev_act, items_list):
@@ -431,6 +453,7 @@ class JHSWorker():
         giveup_items = m_itemsObj.giveup_items
         if len(giveup_items) > 0:
             print '# Activity giveup Items num:',len(giveup_items)
+            self.giveup_val = (brandact_id, brandact_name, giveup_items)
             raise Common.RetryException('# run_item: actid:%s actname:%s some items retry more than max times..'%(str(brandact_id),str(brandact_name)))
         print '# Activity Items end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), brandact_id, brandact_name
 
@@ -558,9 +581,9 @@ if __name__ == '__main__':
     pass
     #w = JHSWorker()
     # delete end acts
-    #w.scanEndActs(('2015-06-01',Common.time_s(w.crawling_time)))
+    #w.scanEndActs(('2015-06-10',Common.time_s(w.crawling_time)))
     # delete end items
-    #w.scanEndItems(('2015-06-01',Common.time_s(w.crawling_time)))
+    #w.scanEndItems(('2015-06-10',Common.time_s(w.crawling_time)))
     # put acts in redis 
     #w.actsRedis()
     # put items in redis 

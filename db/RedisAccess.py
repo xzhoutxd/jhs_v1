@@ -106,23 +106,26 @@ class RedisAccess:
     # 写入jhs活动
     def write_jhsact(self, keys, val):
         try:
-            crawl_time, category_id, act_id, act_name, act_url, act_position, act_enterpic_url, act_remindnum, act_coupon, act_coupons, act_sign, _act_ids, start_time, end_time, item_ids = val
-            act_dict = {}
-            act_dict["crawl_time"]          = str(crawl_time)
-            act_dict["category_id"]         = str(category_id)
-            act_dict["act_id"]              = str(act_id)
-            act_dict["act_name"]            = act_name
-            act_dict["act_url"]             = act_url
-            act_dict["act_position"]        = str(act_position)
-            act_dict["act_enterpic_url"]    = act_enterpic_url
-            act_dict["act_remindnum"]       = str(act_remindnum)
-            act_dict["act_coupon"]          = str(act_coupon)
-            act_dict["act_coupons"]         = act_coupons
-            act_dict["_act_ids"]            = str(_act_ids)
-            act_dict["act_sign"]            = str(act_sign)
-            act_dict["start_time"]          = str(start_time)
-            act_dict["end_time"]            = str(end_time)
-            act_dict["item_ids"]            = item_ids
+            if type(val) is dict:
+                act_dict = val
+            else:
+                crawl_time, category_id, act_id, act_name, act_url, act_position, act_enterpic_url, act_remindnum, act_coupon, act_coupons, act_sign, _act_ids, start_time, end_time, item_ids = val
+                act_dict = {}
+                act_dict["crawl_time"]          = str(crawl_time)
+                act_dict["category_id"]         = str(category_id)
+                act_dict["act_id"]              = str(act_id)
+                act_dict["act_name"]            = act_name
+                act_dict["act_url"]             = act_url
+                act_dict["act_position"]        = str(act_position)
+                act_dict["act_enterpic_url"]    = act_enterpic_url
+                act_dict["act_remindnum"]       = str(act_remindnum)
+                act_dict["act_coupon"]          = str(act_coupon)
+                act_dict["act_coupons"]         = act_coupons
+                act_dict["_act_ids"]            = str(_act_ids)
+                act_dict["act_sign"]            = str(act_sign)
+                act_dict["start_time"]          = str(start_time)
+                act_dict["end_time"]            = str(end_time)
+                act_dict["item_ids"]            = item_ids
             act_json = json.dumps(act_dict)
             self.redis_pool.write(keys, act_json, self.JHS_ACT_DB)
         except Exception, e:

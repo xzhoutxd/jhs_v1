@@ -103,6 +103,7 @@ class JHSGroupItemWorker():
         for _item in _items:
             item_juid = _item[0]
             end_items.append({"item_juId":str(item_juid)})
+        print '# del item nums:',len(end_items)
         # 删除已经结束的商品
         self.delItem(end_items)
             
@@ -136,5 +137,6 @@ class JHSGroupItemWorker():
 if __name__ == '__main__':
     pass
     #w = JHSGroupItemWorker()
+    #w.scanEndItems()
     #w.scanNotEndItems()
         

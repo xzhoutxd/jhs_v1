@@ -278,7 +278,7 @@ class JHSBrandTEMP():
         p = re.compile(r'<div id="(todayBrand)|(custom\d+)".+?>\s+<div class="l-f-title">\s+<div class="l-f-tbox">(.+?)</div>\s+</div>\s+<div class="ju-itemlist">\s+<ul.+?data-spm="floor\d+">(.+?)</ul>', flags=re.S)
         for floor in p.finditer(page):
             f_name, brand_list = floor.group(3), floor.group(4)
-            f_name = re.sub('&amp;','',f_name)
+            f_name = Common.htmlDecode(f_name)
             today_i = 1
             p = re.compile(r'<li class="brand.+?".+?>.+?<a.+?href="(.+?)".+?>.+?</a>.+?</li>', flags=re.S)
             for act in p.finditer(brand_list):
