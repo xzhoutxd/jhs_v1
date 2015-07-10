@@ -88,12 +88,12 @@ class JHSActPosition():
             json_valList = []
             for b_url_val in b_url_valList:
                 b_url, f_name, f_catid = b_url_val
-                json_valList.append((b_url,Config.ju_brand_home,(f_name,f_catid)))
+                json_valList.append((b_url,Config.ju_brand_home,(f_catid,f_name)))
             bResult_list = self.jsonpage.get_json(json_valList)
 
             act_valList = []
             if bResult_list and bResult_list != []:
-                a_val = (self.begin_time,)
+                a_val = (Config.JHS_Brand,'',self.begin_time,)
                 act_valList = self.jsonpage.parser_brandjson(bResult_list,a_val)
 
             if act_valList != []:

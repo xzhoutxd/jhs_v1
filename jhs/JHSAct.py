@@ -856,7 +856,7 @@ class JHSAct():
         return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_sign,self.brandact_status,(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.category_type,self.subNavName,str(self.brandact_position),str(self.brandact_categoryId),self.brandact_categoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate,self.crawling_beginHour))
 
     def outTupleParse(self):
-        return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_sign,(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,str(self.brandact_position),str(self.brandact_categoryId),self.brandact_categoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate))
+        return (str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),self.brandact_sign,(Common.time_s(self.crawling_time),str(self.brandact_id),self.brandact_name,str(self.brandact_position),str(self.brandact_front_categoryId),self.brandact_categoryName,Common.fix_url(self.brandact_enterpic_url),self.crawling_beginDate))
 
     def outTupleForRedis(self):
         return (Common.time_s(self.crawling_time),str(self.brandact_categoryId),str(self.brandact_id),self.brandact_name,Common.fix_url(self.brandact_url),str(self.brandact_position),Common.fix_url(self.brandact_enterpic_url),str(self.brandact_remindNum),str(self.brandact_coupon),Config.sep.join(self.brandact_coupons),str(self.brandact_sign),self.brandact_other_ids,Common.time_s(float(self.brandact_starttime)/1000),Common.time_s(float(self.brandact_endtime)/1000),self.brandact_itemids)
