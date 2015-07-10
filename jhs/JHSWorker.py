@@ -301,7 +301,7 @@ class JHSWorker():
                 # redis
                 keys = [self.worker_type, str(act.brandact_id)]
                 self.redisAccess.write_jhsact(keys, prev_act)
-                self.mysqlAccess.updateJhsActEndtime((end_time_s,str(act_obj.brandact_id)))
+                self.mysqlAccess.updateJhsActEndtime((end_time_s,str(act.brandact_id)))
 
     #更新马上开团活动中商品位置
     def update_actItems_position(self, act):
