@@ -289,6 +289,7 @@ class JHSBrandTEMP():
                     act_id = m.group(1)
                     top_brands[str(act_id)] = {'act_id':str(act_id),'position':today_i,'url':act_url,'datatype':f_name}
                 else:
+                    act_url = act_url.split('?')[0]
                     top_brands[str(act_url)] = {'act_id':str(act_id),'position':today_i,'url':act_url,'datatype':f_name}
                 print '# top brand: position:%s,id:%s,url:%s'%(str(today_i),str(act_id),act_url),f_name
                 today_i += 1

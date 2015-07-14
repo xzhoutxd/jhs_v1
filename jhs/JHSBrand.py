@@ -107,16 +107,16 @@ class JHSBrand():
             self.act_queue.putlistQ(act_val_list)
             print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            #if self.m_type == 'm':
-                #val = (Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -1))
-                ## 删除Redis中上个小时结束的活动
-                #print '# end acts num:',len(_acts)
-                #_acts = self.mysqlAccess.selectJhsActEndLastOneHour(val)
-                #self.work.delAct(_acts)
-                ## 删除Redis中上个小时结束的商品
-                #_items = self.mysqlAccess.selectJhsItemEndLastOneHour(val)
-                #print '# end items num:',len(_items)
-                #self.work.delItem(_items)
+            if self.m_type == 'm':
+                val = (Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -1))
+                # 删除Redis中上个小时结束的活动
+                print '# end acts num:',len(_acts)
+                _acts = self.mysqlAccess.selectJhsActEndLastOneHour(val)
+                self.work.delAct(_acts)
+                # 删除Redis中上个小时结束的商品
+                _items = self.mysqlAccess.selectJhsItemEndLastOneHour(val)
+                print '# end items num:',len(_items)
+                self.work.delItem(_items)
         except Exception as e:
             print '# antpage error :',e
             Common.traceback_log()
