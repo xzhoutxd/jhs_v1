@@ -282,7 +282,7 @@ class JHSBrandTEMP():
             today_i = 1
             p = re.compile(r'<li class="brand.+?".+?>.+?<a.+?href="(.+?)".+?>.+?</a>.+?</li>', flags=re.S)
             for act in p.finditer(brand_list):
-                act_url = Common.fix_url(act.group(1))
+                act_url = Common.fix_url(Common.htmlDecode(act.group(1)))
                 act_id = -1
                 m = re.search(r'act_sign_id=(\d+)', act_url, flags=re.S)
                 if m:
