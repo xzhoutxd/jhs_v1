@@ -481,7 +481,7 @@ class JHSWorker():
             if not _msg:
                 i += 1
                 if i > M:
-                    print '# not get queue of key:',_key
+                    print '# not get queue of key:',_key,time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                     print '# all get num of item in queue:',n
                     break
                 time.sleep(10)
