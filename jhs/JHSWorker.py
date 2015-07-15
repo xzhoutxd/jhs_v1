@@ -144,6 +144,11 @@ class JHSWorker():
         except Exception as e:
             print '# exception err:',e
             self.crawlRetry(_key,msg)
+            # 重新拨号
+            try:
+                self.dialRouter(4, 'chn')
+            except Exception as e:
+                print '# DailClient Exception err:', e
             time.sleep(random.uniform(10,30))
             Common.traceback_log()
 
