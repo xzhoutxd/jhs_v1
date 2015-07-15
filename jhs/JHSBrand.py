@@ -110,8 +110,8 @@ class JHSBrand():
             if self.m_type == 'm':
                 val = (Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -2),Common.add_hours(self.begin_time, -1))
                 # 删除Redis中上个小时结束的活动
-                print '# end acts num:',len(_acts)
                 _acts = self.mysqlAccess.selectJhsActEndLastOneHour(val)
+                print '# end acts num:',len(_acts)
                 self.work.delAct(_acts)
                 # 删除Redis中上个小时结束的商品
                 _items = self.mysqlAccess.selectJhsItemEndLastOneHour(val)
