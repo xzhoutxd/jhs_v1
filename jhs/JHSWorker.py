@@ -167,6 +167,7 @@ class JHSWorker():
 
         if self._crawl_type == 'homeposition':
             top_acts = self.brand_temp.activityTopbrandTemp(page)
+            print top_acts
             self.save_top_acts(top_acts)
 
     def save_top_acts(self, top_acts):
@@ -462,7 +463,7 @@ class JHSWorker():
 
         i, M = 0, 20
         if _obj == 'cat':
-            M = 5
+            M = 10
         n = 0
         while True: 
             if _crawl_type and _crawl_type != '':
