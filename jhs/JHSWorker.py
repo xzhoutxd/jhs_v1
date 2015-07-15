@@ -152,7 +152,6 @@ class JHSWorker():
             time.sleep(random.uniform(10,30))
             Common.traceback_log()
 
-    #def parse_homepage(self, msg, _val):
     def run_cat_home(self, msg, _val):
         msg_val = msg["val"]
         _url, refers = msg_val

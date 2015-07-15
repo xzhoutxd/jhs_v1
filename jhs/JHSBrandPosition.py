@@ -105,7 +105,7 @@ class JHSBrandPosition():
             if json_val_list and len(json_val_list) > 0:
                 # 保存到redis队列
                 self.cat_queue.putlistQ(json_val_list)
-                print '# cat homeposition queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                print '# cat position queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             # 类目的活动Json
             obj = 'cat'
@@ -122,8 +122,6 @@ class JHSBrandPosition():
             self.act_queue.putlistQ(act_val_list)
             print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            #if self.m_type == 'm':
-                # 删除Redis中结束活动
         except Exception as e:
             print '# antpage error :',e
             Common.traceback_log()

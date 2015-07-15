@@ -275,7 +275,7 @@ class JHSBrandTEMP():
     # 品牌团页面Top推广位模板2
     def activityTopbrandTemp2(self, page):
         top_brands = {}
-        p = re.compile(r'<div id="(todayBrand)|(custom\d+)".+?>\s+<div class="l-f-title">\s+<div class="l-f-tbox">(.+?)</div>\s+</div>\s+<div class="ju-itemlist">\s+<ul.+?data-spm="floor\d+">(.+?)</ul>', flags=re.S)
+        p = re.compile(r'<div id="(todayBrand)|(custom\d+)".+?>\s+<div class="l-f-title">\s+<div class="l-f-tbox">(.+?)</div>\s+</div>\s+<div class="ju-itemlist">\s+<ul.+?data-spm="floor\d+".*?>(.+?)</ul>', flags=re.S)
         for floor in p.finditer(page):
             f_name, brand_list = floor.group(3), floor.group(4)
             f_name = Common.htmlDecode(f_name)
