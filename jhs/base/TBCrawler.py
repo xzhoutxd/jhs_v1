@@ -46,6 +46,9 @@ class TBCrawler(Crawler):
         # 聚划算品牌团页面延迟1-3秒
         elif re.search(r'http://ju.taobao.com/tg/brand_items.htm',url):
             time.sleep(random.uniform(1, 3))
+        # 聚划算商品详情页销量 库存信息延时1秒
+        elif re.search(r'http://dskip.ju.taobao.com/detail/json/item_dynamic.htm',url):
+            time.sleep(1)
         # 其他页面延时0.1-1秒
         else:
             time.sleep(random.uniform(0.1, 1))
