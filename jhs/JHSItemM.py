@@ -248,6 +248,7 @@ class JHSItemM(MyThread):
                     #if updateSql:
                     #    self.mysqlAccess.updateJhsItem(updateSql)
 
+                    self.push_back(self.items, item.outSqlForDay())
                     daySql = item.outSqlForDay()
                     _itemdaysql_list.append(daySql)
                     if self.insertItemday(_itemdaysql_list): _itemdaysql_list = []
