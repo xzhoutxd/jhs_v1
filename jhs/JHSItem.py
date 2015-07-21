@@ -320,6 +320,14 @@ class JHSItem():
                             quan_anc_info += " " + anc.group(1).strip()
                         self.item_coupons.append(''.join(quan_info.split()) + Config.sep + quan_anc_info)
 
+                if self.item_soldCount == '' or self.item_stock == '':
+                    m = re.search(r'"success":\s*"true"', json_str, flags=re.S)
+                    m = re.search(r'"success":\s*"true"', self.item_pages['item-dynamic'], flags=re.S)
+                    if m:
+                        print '# item not find soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
+                    else:
+                        raise Common.InvalidPageException("# itemDynamic: not get dynamic page,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
+
 
     # 商品锁定信息
     def itemLock(self, page):
@@ -682,8 +690,6 @@ class JHSItem():
         self.itemLock(self.item_juPage)
         # 商品关注人数, 商品销售数量, 商品库存
         self.itemDynamic(self.item_juPage)
-        if self.item_soldCount == '' or self.item_stock == '':
-            print '# item not get soldcount or stock,item_juid:%s,item_id:%s,item_actid:%s'%(str(self.item_juId),str(self.item_id),str(self.item_actId))
 
     # Hour
     def antPageHour(self, val):
@@ -701,8 +707,6 @@ class JHSItem():
         self.itemLock(self.item_juPage)
         # 商品关注人数, 商品销售数量, 商品库存
         self.itemDynamic(self.item_juPage)
-        if self.item_soldCount == '' or self.item_stock == '':
-            print '# item not get soldcount or stock,item_juid:%s,item_id:%s,item_actid:%s'%(str(self.item_juId),str(self.item_id),str(self.item_actId))
 
     # item islock
     def antPageLock(self, val):
@@ -725,7 +729,11 @@ class JHSItem():
             # 商品关注人数, 商品销售数量, 商品库存
             self.itemDynamic(self.item_juPage)
             if self.item_remindNum == '':
-                print '# item not get remind num,item_juid:%s,item_id:%s,item_actid:%s'%(str(self.item_juId),str(self.item_id),str(self.item_actId))
+                m = re.search(r'"success":\s*"true"', self.item_pages['item-dynamic'], flags=re.S)
+                if m:
+                    print '# item not find remind num,item_juid:%s,item_id:%s,item_actid:%s'%(str(self.item_juId),str(self.item_id),str(self.item_actId))
+                else:
+                    raise Common.InvalidPageException("# itemDynamic: not get dynamic page,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
 
     # 商品团
     def antPageGroupItem(self, val):
@@ -761,15 +769,6 @@ class JHSItem():
 
         # 商品关注人数, 商品销售数量, 商品库存
         self.itemDynamic(self.item_juPage)
-        if self.item_soldCount == '' or self.item_stock == '':
-            print '# item not get soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
-        #    # 聚划算商品页信息
-        #    self.itemPage()
-        #    self.item_pages['item-home-hour'] = (self.item_ju_url, self.item_juPage)
-        #    # 商品关注人数, 商品销售数量, 商品库存
-        #    self.itemDynamic(self.item_juPage)
-        #    if self.item_soldCount == '' or self.item_stock == '':
-        #        print '# item not get soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
 
     def itemStatus(self):
         if self.item_status:
