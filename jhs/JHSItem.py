@@ -340,23 +340,26 @@ class JHSItem():
             
     # 商品其他优惠信息
     def itemPromotiton(self):
-        promot_url = 'http://dskip.ju.taobao.com/promotion/json/get_shop_promotion.do?ju_id=%s'%str(self.item_juId)
-        promot_page = self.crawler.getData(promot_url, self.item_ju_url)
-        if not promot_page or promot_page == '': raise Common.InvalidPageException("# itemPromotion: not find promotion page")
-        if promot_page and promot_page != '':
-            self.item_pages['item-shoppromotion'] = (promot_url,promot_page)
-            m = re.search(r'"success":', promot_page, flags=re.S)
-            if m:
-                result = json.loads(promot_page)
-                if result.has_key('success') and result.has_key('model') and result['model'] != []:
-                    for model in result['model']:
-                        title = ''
-                        if model.has_key('title'):
-                            title = model['title']
-                        if model.has_key('promLevels') and model['promLevels'] != []:
-                            for level in model['promLevels']:
-                                if level.has_key('title'):
-                                    self.item_promotions.append('%s:%s'%(title,level['title']))
+        try:
+            promot_url = 'http://dskip.ju.taobao.com/promotion/json/get_shop_promotion.do?ju_id=%s'%str(self.item_juId)
+            promot_page = self.crawler.getData(promot_url, self.item_ju_url)
+            if not promot_page or promot_page == '': raise Common.InvalidPageException("# itemPromotion: not find promotion page")
+            if promot_page and promot_page != '':
+                self.item_pages['item-shoppromotion'] = (promot_url,promot_page)
+                m = re.search(r'"success":', promot_page, flags=re.S)
+                if m:
+                    result = json.loads(promot_page)
+                    if result.has_key('success') and result.has_key('model') and result['model'] != []:
+                        for model in result['model']:
+                            title = ''
+                            if model.has_key('title'):
+                                title = model['title']
+                            if model.has_key('promLevels') and model['promLevels'] != []:
+                                for level in model['promLevels']:
+                                    if level.has_key('title'):
+                                        self.item_promotions.append('%s:%s'%(title,level['title']))
+        except Exception as e:
+            print "# itemPromotiton error:",e
 
     # parser item
     def itemParser(self):
