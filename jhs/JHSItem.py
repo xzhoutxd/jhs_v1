@@ -322,7 +322,6 @@ class JHSItem():
 
                 if self.item_soldCount == '' or self.item_stock == '':
                     m = re.search(r'"success":\s*"true"', json_str, flags=re.S)
-                    m = re.search(r'"success":\s*"true"', self.item_pages['item-dynamic'], flags=re.S)
                     if m:
                         print '# item not find soldcount or stock,item_juid:%s,item_id:%s'%(str(self.item_juId),str(self.item_id))
                     else:
@@ -346,16 +345,18 @@ class JHSItem():
         if not promot_page or promot_page == '': raise Common.InvalidPageException("# itemPromotion: not find promotion page")
         if promot_page and promot_page != '':
             self.item_pages['item-shoppromotion'] = (promot_url,promot_page)
-            result = json.loads(promot_page)
-            if result.has_key('success') and result.has_key('model') and result['model'] != []:
-                for model in result['model']:
-                    title = ''
-                    if model.has_key('title'):
-                        title = model['title']
-                    if model.has_key('promLevels') and model['promLevels'] != []:
-                        for level in model['promLevels']:
-                            if level.has_key('title'):
-                                self.item_promotions.append('%s:%s'%(title,level['title']))
+            m = re.search(r'"success":', promot_page, flags=re.S)
+            if m:
+                result = json.loads(promot_page)
+                if result.has_key('success') and result.has_key('model') and result['model'] != []:
+                    for model in result['model']:
+                        title = ''
+                        if model.has_key('title'):
+                            title = model['title']
+                        if model.has_key('promLevels') and model['promLevels'] != []:
+                            for level in model['promLevels']:
+                                if level.has_key('title'):
+                                    self.item_promotions.append('%s:%s'%(title,level['title']))
 
     # parser item
     def itemParser(self):
