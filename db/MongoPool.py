@@ -19,7 +19,7 @@ class MongoPool(object):
         self.fs_name = Environ.mongodb_fs
 
         # mongodb connect pool
-        self.mongo   = pymongo.Connection(host=_host, port=_port)
+        self.mongo   = pymongo.Connection(host=_host, port=_port, auto_start_request=False)
 
         # 淘宝/天猫网页库
         self.tb_db   = self.mongo["tb"]
