@@ -115,8 +115,8 @@ class JHSBrandMain():
                 if not page or page == '': raise Common.InvalidPageException("# main: not get JHS brand home.")
                 self.ju_brand_page = page
                 # 保存html文件
-                page_datepath = 'act/main/' + time.strftime("%Y/%m/%d/%H/", time.localtime(self.begin_time))
-                Config.writefile(page_datepath,'main-brand.htm',self.ju_brand_page)
+                #page_datepath = 'act/main/' + time.strftime("%Y/%m/%d/%H/", time.localtime(self.begin_time))
+                #Config.writefile(page_datepath,'main-brand.htm',self.ju_brand_page)
 
                 # 数据接口URL list
                 c_url_val_list = self.brand_temp.temp(page)

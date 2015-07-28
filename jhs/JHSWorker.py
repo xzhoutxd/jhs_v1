@@ -270,14 +270,22 @@ class JHSWorker():
 
         if self._crawl_type == 'position':
             brandact_id,brandact_name,brandact_url,brandact_sign,brandact_status,val = act_obj.outTupleForPosition()
-            if int(brandact_sign) != 3 and brandact_status != '' and brandact_status != 'blank':
-                print '# insert activity position, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
-                self.mysqlAccess.insertJhsActPosition_hour(val)
+            if int(brandact_sign) != 3:
+                if act_obj.brandact_starttime and act_obj.brandact_starttime != 0.0 and 1 >= Common.subTS_hours(int(float(act_obj.brandact_starttime)/1000), self.crawling_time):
+                    print '# insert activity position, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
+                    self.mysqlAccess.insertJhsActPosition_hour(val)
+                
+                elif brandact_status != '' and brandact_status != 'blank':
+                    print '# insert activity position, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
+                    self.mysqlAccess.insertJhsActPosition_hour(val)
         else:
             act_keys = [self.worker_type, str(act_obj.brandact_id)]
             prev_act = self.redisAccess.read_jhsact(act_keys)
             # 是否需要抓取商品
             if act_obj and act_obj.crawling_confirm != 2:
+                # 保存的活动信息
+                self.putActDB(act_obj, prev_act)
+                # 活动中的商品
                 items_list = []
                 # 只取非俪人购商品
                 if int(act_obj.brandact_sign) != 3:
@@ -289,10 +297,12 @@ class JHSWorker():
                 else:
                     print '# ladygo activity id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name)
 
-                print '# pro act start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                #print '# pro act start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 # 处理活动信息
-                self.procAct(act_obj, prev_act, items_list)
-                print '# pro act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                #self.procAct(act_obj, prev_act, items_list)
+                # 处理活动redis信息
+                self.procActRedis(act_obj, prev_act, items_list)
+                #print '# pro act end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             else:
                 self.update_startact(act_obj, prev_act)
                 print '# Already start activity, id:%s name:%s'%(act_obj.brandact_id, act_obj.brandact_name) 
@@ -404,8 +414,8 @@ class JHSWorker():
         # redis
         self.mergeAct(act, prev_act)
         keys = [self.worker_type, str(act.brandact_id)]
-        val = act.outTupleForRedis()
-        self.redisAccess.write_jhsact(keys, val)
+        #val = act.outTupleForRedis()
+        #self.redisAccess.write_jhsact(keys, val)
         
         if self._crawl_type == 'main':
             # mysql
@@ -420,6 +430,25 @@ class JHSWorker():
         # 存网页
         _pages = act.outItemPage(self._crawl_type)
         self.mongofsAccess.insertJHSPages(_pages)
+
+    # To process activity in redis
+    def procActRedis(self, act, prev_act, items_list):
+        # 活动抓取的item ids
+        act.brandact_itemids = []
+        if items_list:
+            for item in items_list:
+                # item juid
+                if str(item[1]) != '':
+                    act.brandact_itemids.append(str(item[1]))
+                # item id
+                if str(item[10]) != '':
+                    act.brandact_itemids.append(str(item[10]))
+
+        # redis
+        self.mergeAct(act, prev_act)
+        keys = [self.worker_type, str(act.brandact_id)]
+        val = act.outTupleForRedis()
+        self.redisAccess.write_jhsact(keys, val)
 
     # To process activity
     def procAct(self, act, prev_act, items_list):

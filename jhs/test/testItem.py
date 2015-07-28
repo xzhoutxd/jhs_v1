@@ -50,6 +50,7 @@ class testItem():
         #item.antPageLock(_val)
         #print item.outSqlForLock()
 
+        """
         url = 'http://detail.ju.taobao.com/home.htm?id=10000007068446&item_id=45160928526'
         item_id = '45160928526'
         ju_id = '10000007068446'
@@ -66,7 +67,6 @@ class testItem():
         for v in iteminfoSql:
             print v
 
-        """
         # day
         #self.item_juId,self.item_actId,self.item_actName,self.item_act_url,self.item_juName,self.item_ju_url,self.item_id,self.item_url,self.item_oriPrice,self.item_actPrice,self.crawling_begintime = val
         _val = (ju_id,'','','','',url,item_id,'','','',begin_time)
@@ -114,6 +114,25 @@ class testItem():
         for v in item.outGroupIteminfoSql():
             print v
         """
+
+        #val = ('http://ju.taobao.com/jusp/meizhuangpindao/tp.htm','10000007689474','18931578944','http://detail.ju.taobao.com/home.htm?id=10000007689474&item_id=18931578944',begin_time,11)
+
+        val = ('http://ju.taobao.com/jusp/meizhuangpindao/tp.htm','10000007693916','42047343300','http://detail.ju.taobao.com/home.htm?id=10000007693916&item_id=42047343300',begin_time,11)
+        item = JHSItem()
+        item.antPageGroupItemHour(val)
+        update_sql, hour_sql = item.outTupleGroupItemHour()
+        print '# update'
+        print update_sql
+        self.mysqlAccess.updateJhsGroupItem(update_sql)
+        print '# hour'
+        print hour_sql
+        print '# update'
+        for v in update_sql:
+            print v
+        print '# hour'
+        for v in hour_sql:
+            print v
+        #self.item_groupCat_url,self.item_juId,self.item_id,self.item_ju_url,self.crawling_begintime,self.hour_index = val
         
 
 

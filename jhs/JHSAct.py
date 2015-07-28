@@ -553,6 +553,15 @@ class JHSAct():
             f_url = (floor_url.group(1)).replace('&amp;','&')
             position = self.getItemDataFromInterface(f_url, position, i)
 
+        p = re.compile(r'<.+?data-url="(.+?)".+?>', flags=re.S)
+        i = 0
+        for floor_url in p.finditer(page):
+            if floor_url.group(1).find('{{') != -1: continue
+            i += 1
+            f_url = Common.fix_url((floor_url.group(1)).replace('&amp;','&'))
+            #print f_url
+            position = self.getItemDataFromInterface(f_url, position, i)
+
     # 从url中获取id
     def get_ids_from_url(self,ids,url_type,items,position):
         item_id, item_juId = '', ''
