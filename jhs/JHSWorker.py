@@ -9,17 +9,20 @@ import random
 import json
 import time
 import traceback
-import base.Common as Common
-import base.Config as Config
-from dial.DialClient import DialClient
-from db.MysqlAccess import MysqlAccess
-from base.TBCrawler import TBCrawler
 from JHSBrandTEMP import JHSBrandTEMP
 from Message import Message
 from Jsonpage import Jsonpage
 from JHSAct import JHSAct
 from JHSItemM import JHSItemM
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+from MyThread  import MyThread
+from TBCrawler import TBCrawler
+sys.path.append('../dial')
+from DialClient import DialClient
 sys.path.append('../db')
+from MysqlAccess import MysqlAccess
 from RedisQueue  import RedisQueue
 from RedisAccess import RedisAccess
 from MongofsAccess import MongofsAccess

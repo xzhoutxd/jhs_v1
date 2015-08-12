@@ -10,9 +10,10 @@ import json
 import time
 import traceback
 import threading
-import base.Common as Common
-import base.Config as Config
-from base.TBCrawler import TBCrawler
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+from TBCrawler import TBCrawler
 
 class JHSItem():
     '''A class of Juhuasuan Item'''

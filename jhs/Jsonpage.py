@@ -11,10 +11,12 @@ import time
 import Queue
 from Queue import Empty
 import traceback
-import base.Common as Common
-import base.Config as Config
-from dial.DialClient import DialClient
-from base.TBCrawler import TBCrawler
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+from TBCrawler import TBCrawler
+sys.path.append('../dial')
+from DialClient import DialClient
 
 class Jsonpage():
     '''A class of json page'''

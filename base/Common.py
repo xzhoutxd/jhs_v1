@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 #!/usr/bin/env python
 
+import sys
 import re
 import os
 import random
@@ -8,6 +9,7 @@ import time
 import datetime
 import calendar
 import urllib
+import traceback
 
 # defined exception
 class InvalidParameterException(Exception):
@@ -62,6 +64,23 @@ class NoItemException(Exception):
 class NoShopItemException(Exception):
     pass
 
+# system busy exception
+class SystemBusyException(Exception):
+    pass
+
+# retry exception
+class RetryException(Exception):
+    pass
+
+def traceback_log():
+    print '#####--Traceback Start--#####'
+    tp,val,td = sys.exc_info()
+    for file, lineno, function, text in traceback.extract_tb(td):
+        print "exception traceback err:%s,line:%s,in:%s"%(file, lineno, function)
+        print text
+    print "exception traceback err:%s,%s,%s"%(tp,val,td)
+    print '#####--Traceback End--#####'
+
 # 单体模式
 def singleton(cls, *args, **kw):  
     instances = {}  
@@ -81,7 +100,13 @@ template_low = 'abcdefghijklmnopqrstuvwxyz0123456789'
 template_tag = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&='
 template_num = '0123456789'
 
+
 ### time functions ###
+def date2timestamp(d):
+    return float(time.mktime(d.timetuple()))
+
+def nowhour_s(fmt='%H'):
+    return time.strftime(fmt, time.localtime(time.time()))
 
 # 取当前时间
 def now():
@@ -133,6 +158,13 @@ def str2timestamp(s, fmt='%Y-%m-%d %H:%M:%S'):
     except:
         return 0.0
 
+def date_s(t, fmt='%Y-%m-%d'):
+    s = ''
+    if type(t) is float or type(t) is int:
+        s = time.strftime(fmt, time.localtime(t))
+    return s
+
+
 # To compute time delta
 def timeDelta(t, h='00:00:00'):
     return str2timestamp(day_s(t) + ' ' + h, '%Y-%m-%d %H:%M:%S')
@@ -144,6 +176,12 @@ def yyyymmddhh24(t, fmt='%Y-%m-%d %H:00:00'):
     return str2timestamp(time_s(t, fmt), fmt)
 
 ### datetime functions ###
+def add_days(n = 0, fmt='%Y-%m-%d'):
+    dt = datetime.datetime.now()
+    nDays = datetime.timedelta(days=n)
+    dt = dt + nDays
+    return dt.strftime(fmt)
+
 def dt_to_s(dt, fmt='%Y-%m-%d'):
     return datetime.datetime.strftime(dt, fmt)    
 
@@ -175,6 +213,32 @@ def s_add_years(s, n = 0):
     year = dt.year + n
     dt   = dt.replace(year=year)
     return dt
+
+def add_hours(ts, n=0, fmt='%Y-%m-%d %H:%M:%S'):
+    dt = datetime.datetime.fromtimestamp(ts)
+    nHours = datetime.timedelta(hours=n)
+    dt = dt + nHours
+    return dt.strftime(fmt)
+
+def add_hours_D(ts, n=0, fmt='%Y-%m-%d'):
+    dt = datetime.datetime.fromtimestamp(ts)
+    nHours = datetime.timedelta(hours=n)
+    dt = dt + nHours
+    return dt.strftime(fmt)
+
+def subTS_hours(ts1, ts2):
+    return (ts1 - ts2)/3600
+
+
+##################
+# 随机IP地址
+def randIp():
+    ips = []
+    ips.append(str(random.randint(111, 251)))
+    ips.append(str(random.randint(121, 240)))
+    ips.append(str(random.randint( 40, 251)))
+    ips.append(str(random.randint(150, 253)))
+    return '.'.join(ips)
 
 # 随机用户名
 def rand_user(pfx = 'tb'):
@@ -244,6 +308,7 @@ def quotes_s(s):
 def htmlDecode_s(s):
     return s if s.find(r'&#') == -1 else htmlDecode(s)
 
+
 # 计算中位数
 def median(numbers):
     n = len(numbers)
@@ -279,13 +344,37 @@ def cookieJar2Dict(cj):
         cj_d[c.name] = c.value
     return cj_d
 
+def charset(data):
+    coder = ''
+    if data and data != '':
+        data = re.sub('"|\'| ', '', data.lower())
+        if re.search(r'charset=utf-8', data) or re.search(r'charset="utf-8"', data, flags=re.S):
+            coder = 'utf-8'
+    return coder
+
+# fix ju url 
+def fix_url(url):
+    if url:
+        m = re.search(r'^/+',str(url))
+        if m:
+            url = re.sub(r'^/+','',url)
+
+        if type(url) is str and url != '':
+            if url.find('http://') == -1:
+                url = 'http://' + url
+        else:
+            if str(url).find('http://') == -1:
+                url = 'http://' + url
+
+    return url
+
+
+# local ip
 import socket
 def local_ip():
     host = socket.gethostname()
-    ip   = socket.gethostbyname(host)
+    ip = socket.gethostbyname(host)
     return ip
 
-if __name__ == '__main__':
-    t = now()
-    d = yyyymmdd(t)
-    print time_s(t), time_s(d)
+def agg(num,s='%s'):
+    return ','.join([ s for i in xrange(num)])

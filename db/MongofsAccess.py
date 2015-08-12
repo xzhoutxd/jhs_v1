@@ -47,7 +47,6 @@ class MongofsAccess():
             self.mongo_db.insertPage(db_name, c, data)
         except Exception, e:
             print '# insertJHSPages exception:', e
-            traceback.print_exc()
 
     # 删除网页
     def removeTBPage(self, _key):

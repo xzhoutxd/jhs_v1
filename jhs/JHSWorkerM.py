@@ -5,9 +5,10 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 import time
-import base.Common as Common
-from base.ProcessMgr import ProcessMgr
 from JHSWorker import JHSWorker
+sys.path.append('../base')
+import Common as Common
+from ProcessMgr import ProcessMgr
 
 class JHSWorkerM(ProcessMgr):
     '''A class of JHSWorker process manager'''

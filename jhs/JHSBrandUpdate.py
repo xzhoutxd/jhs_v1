@@ -9,11 +9,13 @@ import random
 import json
 import time
 import traceback
-import base.Common as Common
-import base.Config as Config
-from db.MysqlAccess import MysqlAccess
 from JHSItemQ import JHSItemQ
 from JHSWorkerM import JHSWorkerM
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+sys.path.append('../db')
+from MysqlAccess import MysqlAccess
 
 class JHSBrandUpdate():
     '''A class of brand update'''

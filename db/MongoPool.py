@@ -22,10 +22,10 @@ class MongoPool(object):
         self.mongo   = pymongo.Connection(host=_host, port=_port, auto_start_request=False)
 
         # 淘宝/天猫网页库
-        self.tb_db   = self.mongo["tb"]
+        #self.tb_db   = self.mongo["tb"]
 
         # Vip网页库
-        self.vip_db  = self.mongo["vip"]
+        #self.vip_db  = self.mongo["vip"]
 
         # JHS网页库
         self.jhs_db  = self.mongo["jhs"]

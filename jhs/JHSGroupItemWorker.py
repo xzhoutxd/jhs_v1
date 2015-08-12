@@ -5,14 +5,14 @@ import sys
 import time
 import random
 import traceback
-import base.Common as Common
-import base.Config as Config
 from Message import Message
-from db.MysqlAccess import MysqlAccess
 #from JHSGroupItemM import JHSGroupItemParserM
 #from JHSGroupItemM import JHSGroupItemCrawlerM
-
+sys.path.append('../base')
+import Common as Common
+import Config as Config
 sys.path.append('../db')
+from MysqlAccess import MysqlAccess
 from RedisAccess import RedisAccess
 from MongoAccess import MongoAccess
 

@@ -2,7 +2,6 @@
 #!/usr/bin/env python
 import sys
 sys.path.append('../base')
-
 import Common as Common
 
 @Common.singleton

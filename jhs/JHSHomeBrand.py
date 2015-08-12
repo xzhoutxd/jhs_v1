@@ -10,10 +10,11 @@ import json
 import time
 import Queue
 import traceback
-import base.Common as Common
-import base.Config as Config
-from base.TBCrawler import TBCrawler
-from base.RetryCrawler import RetryCrawler
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+#from TBCrawler import TBCrawler
+from RetryCrawler import RetryCrawler
 
 class JHSHomeBrand():
     '''A class of brand for home hot'''

@@ -8,12 +8,13 @@ import re
 import random
 import json
 import time
-import base.Common as Common
-import base.Config as Config
 from Jsonpage import Jsonpage
 from JHSGroupItemWorker import JHSGroupItemWorker
 from JHSItemQ import JHSItemQ
 from JHSItemQ import JHSItemQM
+sys.path.append('../base')
+import Common as Common
+import Config as Config
 
 class JHSGroupItemHour():
     '''A class of JHS group item hour sale'''

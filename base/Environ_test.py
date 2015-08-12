@@ -49,38 +49,3 @@ def truncatePage(s):
     # 截断网页字符串，以符合mongodb字段长度限制
     return s if len(s) < mongodb_maxsize else s[0:mongodb_maxsize]
 
-######################## 店铺版设置  ########################
-TBDataPath  = '../../data/tb/'
-TBImagePath = '../../image/tb/'
-Common.createPath(TBDataPath)
-Common.createPath(TBImagePath)
-
-# Taobao data file
-TBDataFiles = {
-    'tm_shop' : 'tm_shop_d.log',
-    'tm_item' : 'tm_item_d.log',
-    'tm_sku'  : 'tm_sku_d.log',
-    'tb_shop' : 'tb_shop_d.log',
-    'tb_item' : 'tb_item_d.log',
-    'tb_sku'  : 'tb_sku_d.log'
-}
-
-######################## VIP设置  ########################
-VipDataPath  = '../../data/vip/'
-VipImagePath = '../../image/vip/'
-Common.createPath(VipDataPath)
-Common.createPath(VipImagePath)
-
-# Vip data file
-VipDataFiles = {
-    'vip_act'  : 'vip_act.log',
-    'vip_item' : 'vip_item.log',
-    'vip_sku_d': 'vip_sku_d.log',
-    'vip_sku_h': 'vip_sku_h.log'
-}
-
-######################## 输出设置  ########################
-DataSinks = ['mysql', 'datafile']
-#DataSinks = ['mysql']
-
-

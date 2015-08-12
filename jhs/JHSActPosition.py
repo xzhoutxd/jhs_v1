@@ -10,15 +10,17 @@ import json
 import time
 import Queue
 import traceback
-import base.Common as Common
-import base.Config as Config
-#from base.TBCrawler import TBCrawler
-from base.RetryCrawler import RetryCrawler
-from db.MysqlAccess import MysqlAccess
 from JHSActM import JHSActM
 from JHSHomeBrand import JHSHomeBrand
 from JHSBrandTEMP import JHSBrandTEMP
 from Jsonpage import Jsonpage
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+#from TBCrawler import TBCrawler
+from RetryCrawler import RetryCrawler
+sys.path.append('../db')
+from MysqlAccess import MysqlAccess
 
 class JHSActPosition():
     '''A class of brand position'''

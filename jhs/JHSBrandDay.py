@@ -9,12 +9,14 @@ import random
 import json
 import time
 import traceback
-import base.Common as Common
-import base.Config as Config
-from db.MysqlAccess import MysqlAccess
 from JHSItemQ import JHSItemQ
 from JHSWorker import JHSWorker
 from JHSWorkerM import JHSWorkerM
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+sys.path.append('../db')
+from MysqlAccess import MysqlAccess
 
 class JHSBrandDay():
     '''A class of brand for every day'''

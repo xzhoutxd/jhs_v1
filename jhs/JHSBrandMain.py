@@ -9,14 +9,16 @@ import random
 import json
 import time
 import traceback
-import base.Common as Common
-import base.Config as Config
-from base.RetryCrawler import RetryCrawler
 from JHSBrandTEMP import JHSBrandTEMP
-from db.MysqlAccess import MysqlAccess
 from JHSCatQ import JHSCatQ
 from JHSActQ import JHSActQ
 from JHSWorker import JHSWorker
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+from RetryCrawler import RetryCrawler
+sys.path.append('../db')
+from MysqlAccess import MysqlAccess
 
 class JHSBrandMain():
     '''A class of brand Main'''

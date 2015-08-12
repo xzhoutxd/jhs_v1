@@ -9,9 +9,10 @@ import random
 import json
 import time
 import traceback
-import base.Common as Common
-import base.Config as Config
 from Message import Message
+sys.path.append('../base')
+import Common as Common
+import Config as Config
 sys.path.append('../db')
 from RedisQueue  import RedisQueue
 from RedisAccess import RedisAccess

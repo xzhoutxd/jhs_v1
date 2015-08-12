@@ -8,15 +8,17 @@ import time
 import random
 import traceback
 import threading
-import base.Config as Config
-import base.Common as Common
-from dial.DialClient import DialClient
-from base.MyThread  import MyThread
 from Queue import Empty
 from Message import Message
-from db.MysqlAccess import MysqlAccess
 from JHSItem import JHSItem
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+from MyThread  import MyThread
+sys.path.append('../dial')
+from DialClient import DialClient
 sys.path.append('../db')
+from MysqlAccess import MysqlAccess
 from RedisAccess import RedisAccess
 from MongofsAccess import MongofsAccess
 

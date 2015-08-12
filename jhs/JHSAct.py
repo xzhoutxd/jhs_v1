@@ -10,9 +10,10 @@ import random
 import json
 import time
 import threading
-import base.Common as Common
-import base.Config as Config
-from base.TBCrawler import TBCrawler
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+from TBCrawler import TBCrawler
 
 class JHSAct():
     '''A class of brand activity Item'''
