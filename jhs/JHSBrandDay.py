@@ -9,7 +9,7 @@ import random
 import json
 import time
 import traceback
-from JHSItemQ import JHSItemQ
+from JHSQ import JHSQ
 from JHSWorker import JHSWorker
 from JHSWorkerM import JHSWorkerM
 sys.path.append('../base')
@@ -29,7 +29,7 @@ class JHSBrandDay():
         self.mysqlAccess = MysqlAccess()
 
         # item queue
-        self.item_queue = JHSItemQ(self._obj, self._crawl_type)
+        self.item_queue = JHSQ(self._obj, self._crawl_type)
 
         #self.work = JHSWorker()
 
@@ -79,9 +79,9 @@ class JHSBrandDay():
         print '# day all item nums:',all_item_num
         print '# need update all acts nums:',len(day_val_list)
         # 清空每天抓取redis队列
-        self.item_queue.clearItemQ()
+        self.item_queue.clearQ()
         # 保存每天抓取redis队列
-        self.item_queue.putItemlistQ(day_val_list)
+        self.item_queue.putlistQ(day_val_list)
         print '# item queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
 if __name__ == '__main__':

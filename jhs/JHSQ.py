@@ -15,7 +15,6 @@ import Common as Common
 import Config as Config
 sys.path.append('../db')
 from RedisQueue  import RedisQueue
-from RedisAccess import RedisAccess
 
 class JHSQ():
     '''A class of jhs redis queue'''
@@ -25,7 +24,6 @@ class JHSQ():
         self.jhs_type   = Config.JHS_TYPE   # queue type
         # DB
         self.redisQueue  = RedisQueue()      # redis queue
-        #self.redisAccess = RedisAccess()     # redis db
 
         # message
         self.message     = Message()

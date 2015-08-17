@@ -9,7 +9,7 @@ import random
 import json
 import time
 import traceback
-from JHSActQ import JHSActQ
+from JHSQ import JHSQ
 from JHSWorker import JHSWorker
 from JHSWorkerM import JHSWorkerM
 sys.path.append('../base')
@@ -26,7 +26,7 @@ class JHSBrandMainCheck():
         self._crawl_type = 'check'
 
         # act queue
-        self.act_queue = JHSActQ(self._crawl_type)
+        self.act_queue = JHSQ(self._obj,self._crawl_type)
 
         # DB
         self.mysqlAccess = MysqlAccess()     # mysql access
@@ -54,13 +54,14 @@ class JHSBrandMainCheck():
                 # 活动信息列表
                 act_val_list = []
                 for act in acts:
-                    act_val_list.append((str(act[1]),act[7],act[8],self.begin_time,str(act[28]),str(act[29])))
+                    #act_val_list.append((str(act[1]),act[7],act[8],self.begin_time,str(act[28]),str(act[29])))
+                    act_val_list.append(act+(self.begin_time,))
                 print '# Main check activity num:',len(act_val_list)
 
                 # 清空act redis队列
-                self.act_queue.clearActQ()
+                self.act_queue.clearQ()
                 # 保存到redis队列
-                self.act_queue.putActlistQ(act_val_list)
+                self.act_queue.putlistQ(act_val_list)
                 print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             """

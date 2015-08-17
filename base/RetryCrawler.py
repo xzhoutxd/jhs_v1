@@ -11,7 +11,8 @@ import time
 import random
 import Common
 from TBCrawler import TBCrawler
-from dial.DialClient import DialClient
+sys.path.append('../dial')
+from DialClient import DialClient
 
 class RetryCrawler():
     '''A class of retry crawl data'''

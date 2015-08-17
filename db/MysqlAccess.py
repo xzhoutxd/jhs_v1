@@ -174,7 +174,8 @@ class MysqlAccess():
     def selectJhsActNotEnd(self, args):
         # 非俪人购
         try:
-            sql = 'select * from nd_jhs_parser_activity where end_time >= %s and act_sign != 3'
+            #sql = 'select * from nd_jhs_parser_activity where end_time >= %s and act_sign != 3'
+            sql = 'select act_id, act_name, act_url, start_time, end_time from nd_jhs_parser_activity where end_time >= %s and act_sign != 3'
             return self.jhs_db.select(sql, args)
         except Exception, e:
             print '# select Jhs alive act exception:', e

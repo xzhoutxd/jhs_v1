@@ -8,14 +8,15 @@ import re
 import random
 import json
 import time
-import base.Common as Common
-import base.Config as Config
-from base.RetryCrawler import RetryCrawler
 from Jsonpage import Jsonpage
 from JHSGroupItemWorker import JHSGroupItemWorker
 from JHSGroupItemCatQ import JHSGroupItemCatQ
 from JHSGroupItemM import JHSGroupItemParserM
 from JHSGroupItemM import JHSGroupItemCrawlerM
+sys.path.append('../base')
+import Common as Common
+import Config as Config
+from RetryCrawler import RetryCrawler
 
 class JHSGroupItem():
     '''A class of JHS group item channel'''

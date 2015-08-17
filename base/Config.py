@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 
 import os
-import Common
+import datetime
 
 ######################## 环境变量  ########################
 configPath= '../../config/'
@@ -115,10 +115,7 @@ g_padAppAgents = [
 ]
 
 # 抓取起始时间
-g_crawledTime = Common.str2timestamp('2000-01-01 00:00:00')
-
-# 淘宝信用级别字典
-#g_TBCreditDict = Common.buyerCredits(configPath + '/taobao_creditlevel.txt')
+g_crawledTime = datetime.datetime.strptime('2000-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
 
 # 网页最大抓取次数
 crawl_retry = 10
@@ -130,7 +127,7 @@ item_crawl_retry = 3
 # 并发线程值
 act_max_th = 10
 item_max_th = 20
-item_mid_th = 50
+item_mid_th = 10
 
 # 同时入库的数据量限制
 act_max_arg = 10

@@ -51,13 +51,13 @@ class Message():
         act["val"]    = _act[3:]
         return act
 
-    def jhsItemQueueMsg(self, _act):
-        act = {}
-        act["retry"]  = _act[0]
-        act["obj"]    = _act[1]
-        act["type"]   = _act[2]
-        act["val"]    = _act[3:]
-        return act
+    def jhsItemQueueMsg(self, _item):
+        item = {}
+        item["retry"]  = _item[0]
+        item["obj"]    = _item[1]
+        item["type"]   = _item[2]
+        item["val"]    = _item[3:]
+        return item
 
     # 商品Redis数据
     def jhsitemMsg(self, _item):

@@ -390,7 +390,9 @@ class JHSAct():
                 print "# ladygo not need.."
             else:
                 data = self.crawler.getData(self.brandact_url, Config.ju_brand_home)
-                if not data and data == '': raise Common.InvalidPageException("# itemConfig:not find act page,actid:%s,act_url:%s"%(str(self.brandact_id), self.brandact_url))
+                if not data and data == '': raise Common.InvalidPageException("# brandPage: not find act page,actid:%s,act_url:%s"%(str(self.brandact_id), self.brandact_url))
+                if page and re.search(r'<title>【聚划算】无所不能聚</title>', str(page), flags=re.S):
+                    raise Common.NoPageException("# brandPage: not find act page, redirecting to juhuasuan home,actid:%s,act_url:%s"%(str(self.brandact_id), self.brandact_url))
                 if data and data != '':
                     self.brandact_page = data
                     self.brandact_pages['act-home'] = (self.brandact_url, data)
@@ -753,7 +755,7 @@ class JHSAct():
 
     # 品牌检查新商品
     def antPageCheck(self, val):
-        self.brandact_id, self.brandact_name, self.brandact_url, self.crawling_begintime, self.brandact_starttime_s,self.brandact_endtime_s = val
+        self.brandact_id, self.brandact_name, self.brandact_url, self.brandact_starttime_s, self.brandact_endtime_s, self.crawling_begintime = val
         # 品牌团页面html
         self.brandPage()
         # 活动页面商品

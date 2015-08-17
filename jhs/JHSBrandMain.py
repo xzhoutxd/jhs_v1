@@ -10,8 +10,7 @@ import json
 import time
 import traceback
 from JHSBrandTEMP import JHSBrandTEMP
-from JHSCatQ import JHSCatQ
-from JHSActQ import JHSActQ
+from JHSQ import JHSQ
 from JHSWorker import JHSWorker
 sys.path.append('../base')
 import Common as Common
@@ -33,13 +32,13 @@ class JHSBrandMain():
         self.brand_temp = JHSBrandTEMP()
 
         # cat home queue
-        self.home_queue = JHSCatQ('home')
+        self.home_queue = JHSQ('cat','home')
 
         # cat queue
-        self.cat_queue = JHSCatQ('main')
+        self.cat_queue = JHSQ('cat','main')
 
         # act queue
-        self.act_queue = JHSActQ('main')
+        self.act_queue = JHSQ('act','main')
 
         self.work = JHSWorker()
 
@@ -57,9 +56,9 @@ class JHSBrandMain():
             # 主机器需要配置redis队列
             if self.m_type == 'm':
                 # 清空分类类表也home url redis队列
-                self.home_queue.clearCatQ()
+                self.home_queue.clearQ()
                 # 保存到redis队列
-                self.home_queue.putCatlistQ([(Config.ju_brand_home, Config.ju_home)])
+                self.home_queue.putlistQ([(Config.ju_brand_home, Config.ju_home)])
                 print '# cat home queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 
             # 类目json url list
@@ -70,13 +69,13 @@ class JHSBrandMain():
             json_val_list = self.work.items
             if json_val_list and len(json_val_list) > 0:
                 # 清空分类的json url redis队列
-                self.cat_queue.clearCatQ()
+                self.cat_queue.clearQ()
                 # 保存到redis队列
-                self.cat_queue.putCatlistQ(json_val_list)
+                self.cat_queue.putlistQ(json_val_list)
                 print '# cat main queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                 # 清空act redis队列
-                self.act_queue.clearActQ()
+                self.act_queue.clearQ()
 
             # 类目的活动Json
             obj = 'cat'
@@ -94,7 +93,7 @@ class JHSBrandMain():
             # 活动数据
             act_val_list = self.work.items
             # 保存到redis队列
-            self.act_queue.putActlistQ(act_val_list)
+            self.act_queue.putlistQ(act_val_list)
             print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             """
@@ -128,13 +127,13 @@ class JHSBrandMain():
                     json_val_list.append((Common.fix_url(c_url),c_name,c_id,Config.ju_brand_home))
 
                 # 清空分类的json url redis队列
-                self.cat_queue.clearCatQ()
+                self.cat_queue.clearQ()
                 # 保存到redis队列
-                self.cat_queue.putCatlistQ(json_val_list)
+                self.cat_queue.putlistQ(json_val_list)
                 print '# cat queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                 # 清空act redis队列
-                self.act_queue.clearActQ()
+                self.act_queue.clearQ()
 
             # 类目的活动Json
             obj = 'cat'
@@ -152,7 +151,7 @@ class JHSBrandMain():
             # 活动数据
             act_val_list = self.work.items
             # 保存到redis队列
-            self.act_queue.putActlistQ(act_val_list)
+            self.act_queue.putlistQ(act_val_list)
             print '# act queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             """

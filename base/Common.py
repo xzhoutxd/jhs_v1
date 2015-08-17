@@ -345,10 +345,10 @@ def cookieJar2Dict(cj):
     return cj_d
 
 def charset(data):
-    coder = ''
+    coder = 'gbk'
     if data and data != '':
         data = re.sub('"|\'| ', '', data.lower())
-        if re.search(r'charset=utf-8', data) or re.search(r'charset="utf-8"', data, flags=re.S):
+        if re.search(r'charset=utf-8', data):
             coder = 'utf-8'
     return coder
 

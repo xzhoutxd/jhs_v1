@@ -243,11 +243,12 @@ class JHSGroupItemCrawlerM(MyThread):
                 if str(e).find('Name or service not known') != -1 or str(e).find('Temporary failure in name resolution') != -1:
                     print _data
                 # 重新拨号
-                try:
-                    self.dialRouter(4, 'item')
-                except Exception as e:
-                    print '# DailClient Exception err:', e 
-                    time.sleep(10)
+                if str(e).find('Read timed out') == -1:
+                    try:
+                        self.dialRouter(4, 'item')
+                    except Exception as e:
+                        print '# DailClient Exception err:', e 
+                        time.sleep(10)
                 time.sleep(random.uniform(10,30))
 
 class JHSGroupItemParserM(MyThread):

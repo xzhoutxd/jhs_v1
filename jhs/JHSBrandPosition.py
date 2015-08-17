@@ -9,8 +9,6 @@ import random
 import json
 import time
 from JHSQ import JHSQ
-from JHSCatQ import JHSCatQ
-from JHSActQ import JHSActQ
 from JHSWorker import JHSWorker
 sys.path.append('../base')
 import Common as Common

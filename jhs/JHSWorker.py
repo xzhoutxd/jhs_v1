@@ -148,10 +148,11 @@ class JHSWorker():
             print '# exception err:',e
             self.crawlRetry(_key,msg)
             # 重新拨号
-            try:
-                self.dialRouter(4, 'chn')
-            except Exception as e:
-                print '# DailClient Exception err:', e
+            if str(e).find('Read timed out') == -1:
+                try:
+                    self.dialRouter(4, 'chn')
+                except Exception as e:
+                    print '# DailClient Exception err:', e
             time.sleep(random.uniform(10,30))
             Common.traceback_log()
 
@@ -416,9 +417,6 @@ class JHSWorker():
 
         # redis
         self.mergeAct(act, prev_act)
-        keys = [self.worker_type, str(act.brandact_id)]
-        #val = act.outTupleForRedis()
-        #self.redisAccess.write_jhsact(keys, val)
         
         if self._crawl_type == 'main':
             # mysql

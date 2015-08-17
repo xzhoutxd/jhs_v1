@@ -241,11 +241,12 @@ class JHSActM(MyThread):
                 # 通知queue, task结束
                 self.queue.task_done()
                 # 重新拨号
-                try:
-                    self.dialRouter(4, 'chn')
-                except Exception as e:
-                    print '# DailClient Exception err:', e
-                    time.sleep(10)
+                if str(e).find('Read timed out') == -1:
+                    try:
+                        self.dialRouter(4, 'chn')
+                    except Exception as e:
+                        print '# DailClient Exception err:', e
+                        time.sleep(10)
                 time.sleep(random.uniform(10,30))
 
 if __name__ == '__main__':

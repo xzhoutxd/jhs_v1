@@ -10,8 +10,7 @@ import json
 import time
 from Jsonpage import Jsonpage
 from JHSGroupItemWorker import JHSGroupItemWorker
-from JHSItemQ import JHSItemQ
-from JHSItemQ import JHSItemQM
+from JHSItemM import JHSItemQM
 sys.path.append('../base')
 import Common as Common
 import Config as Config
@@ -27,9 +26,6 @@ class JHSGroupItemHour():
         # 商品类型标志
         self.item_type = "groupitem"
 
-        # item queue
-        #self.item_queue = JHSItemQ(self.item_type)
-
         # 分布式主机标志
         self.m_type = m_type
         # 队列标志
@@ -43,25 +39,6 @@ class JHSGroupItemHour():
 
     def antPage(self):
         try:
-	    """
-            # 主机器需要配置redis队列
-            if self.m_type == 'm':
-                # 获取已经开团的商品
-                hour_items = self.worker.scanAliveItems()
-                if hour_items and len(hour_items) > 0:
-                    # 清空每小时商品redis队列
-                    self.item_queue.clearItemQ(self.q_type)
-                    # 保存每小时商品redis队列
-                    self.item_queue.putItemlistQ(self.q_type,hour_items)
-                    print '# groupitem hour queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                else:
-                    print '# groupitem not find hour items...'
-
-            # 附加信息
-            a_val = (self.begin_time, self.begin_hour)
-            self.item_queue.itemQ(self.q_type, a_val)
-	    """
-
 	    # 附加信息
             a_val = (self.begin_time, self.begin_hour)
             m_itemQ = JHSItemQM(self.item_type, self.q_type, 20, a_val)

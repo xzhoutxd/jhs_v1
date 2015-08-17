@@ -9,7 +9,7 @@ import random
 import json
 import time
 import traceback
-from JHSItemQ import JHSItemQ
+from JHSQ import JHSQ
 from JHSWorkerM import JHSWorkerM
 sys.path.append('../base')
 import Common as Common
@@ -28,7 +28,7 @@ class JHSBrandUpdate():
         self.mysqlAccess = MysqlAccess()     # mysql access
 
         # item queue
-        self.item_queue = JHSItemQ(self._obj, self._crawl_type)
+        self.item_queue = JHSQ(self._obj, self._crawl_type)
 
         # 抓取开始时间
         self.begin_time = Common.now()
@@ -69,9 +69,9 @@ class JHSBrandUpdate():
                 print '# need update all acts nums:',len(update_val_list)
 
                 # 清空redis队列
-                self.item_queue.clearItemQ()
+                self.item_queue.clearQ()
                 # 保存到redis队列
-                self.item_queue.putItemlistQ(update_val_list)
+                self.item_queue.putlistQ(update_val_list)
                 print '# item queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             """
