@@ -391,7 +391,7 @@ class JHSAct():
             else:
                 data = self.crawler.getData(self.brandact_url, Config.ju_brand_home)
                 if not data and data == '': raise Common.InvalidPageException("# brandPage: not find act page,actid:%s,act_url:%s"%(str(self.brandact_id), self.brandact_url))
-                if page and re.search(r'<title>【聚划算】无所不能聚</title>', str(page), flags=re.S):
+                if data and re.search(r'<title>【聚划算】无所不能聚</title>', str(data), flags=re.S):
                     raise Common.NoPageException("# brandPage: not find act page, redirecting to juhuasuan home,actid:%s,act_url:%s"%(str(self.brandact_id), self.brandact_url))
                 if data and data != '':
                     self.brandact_page = data
