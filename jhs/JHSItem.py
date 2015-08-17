@@ -252,16 +252,16 @@ class JHSItem():
             page = self.crawler.getData(self.item_ju_url, refer_url)
 
             if page and re.search(r'<title>【聚划算】无所不能聚</title>', str(page), flags=re.S):
-                raise Common.NoPageException("# itemConfig: not find ju item page, redirecting to juhuasuan home,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
+                raise Common.NoPageException("# itemPage: not find ju item page, redirecting to juhuasuan home,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
             #elif type(self.crawler.history) is list and len(self.crawler.history) != 0 and re.search(r'302',str(self.crawler.history[0])):
-            #    raise Common.NoPageException("# itemConfig: not find ju item page, redirecting to other page,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
+            #    raise Common.NoPageException("# itemPage: not find ju item page, redirecting to other page,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
 
             if not page or page == '': 
                 print '#crawler history:',self.crawler.history
-                raise Common.InvalidPageException("# antPageDay: not find ju item page,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
+                raise Common.InvalidPageException("# itemPage: not find ju item page,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
             self.item_juPage = page
         else:
-            raise Common.NoPageException("# itemConfig: not find ju item page, url is null,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
+            raise Common.NoPageException("# itemPage: not find ju item page, url is null,juid:%s,item_ju_url:%s"%(str(self.item_juId), self.item_ju_url))
 
     def itemDynamic(self, page):
         # 商品关注人数, 商品销售数量, 商品库存
