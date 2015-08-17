@@ -23,7 +23,7 @@ cd $DIR
 /usr/local/bin/python $DIR/JHSBrand.py $m_type > $LOGFILE
 
 # process queue
-p_num=4
+p_num=3
 obj='act'
 crawl_type='main'
 DIR=`pwd`
