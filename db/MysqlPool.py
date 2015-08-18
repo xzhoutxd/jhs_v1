@@ -56,7 +56,7 @@ mysql_config = {
     # 919
     'jhs' : {'host':'192.168.1.113', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
     # pro 215
-    #'jhs' : {'host':'192.168.7.1', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
+    #'jhs' : {'host':'192.168.7.215', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
 }
 
 g_jhsDbPool = MysqlPool(mysql_config['jhs'])
