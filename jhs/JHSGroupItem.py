@@ -77,7 +77,7 @@ class JHSGroupItem():
                     print '# groupitem not find category...'
 
             obj = 'groupitemcat'
-            crawl_type = 'hour'
+            crawl_type = 'main'
             self.worker.process(obj, crawl_type, Config.ju_home_today)
             items = self.worker.items
             print '# all parser items num:',len(items)
