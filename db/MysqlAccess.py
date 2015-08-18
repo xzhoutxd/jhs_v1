@@ -6,7 +6,6 @@ sys.setdefaultencoding('utf-8')
 
 import traceback
 import MysqlPool
-import base.Config as Config
 
 class MysqlAccess():
     '''A class of mysql db access'''

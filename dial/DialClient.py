@@ -2,20 +2,19 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('../')
 sys.path.append('../base')
 import json
 from socket import AF_INET, SOCK_STREAM, socket
-import base.Common as Common
-import base.Config as Config
+import Common as Common
+import Environ as Environ
 
 class DialClient():
     ''' A class of Dial client, to send dial request '''
     def __init__(self):
-        self.magic_num = Config.magic_num
+        self.magic_num = Environ.magic_num
         self.bufsize   = 1024
-        self.dial_ip   = Config.dial_ip
-        self.dial_port = Config.dial_port
+        self.dial_ip   = Environ.dial_ip
+        self.dial_port = Environ.dial_port
         self.dial_addr = (self.dial_ip, self.dial_port)
 
         self.initClient()

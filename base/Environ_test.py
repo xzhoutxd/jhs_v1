@@ -49,3 +49,10 @@ def truncatePage(s):
     # 截断网页字符串，以符合mongodb字段长度限制
     return s if len(s) < mongodb_maxsize else s[0:mongodb_maxsize]
 
+
+######################## 拨号服务器  #####################
+# 919
+dial_ip     = '192.168.1.112'
+dial_port   = 9075
+magic_num   = '%xiaoshu-dialing-9999%'
+
