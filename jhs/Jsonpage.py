@@ -216,7 +216,8 @@ class Jsonpage():
         # 前一页的数据量,用于计算商品所在的位置
         prepage_count = 0
         for page in iResult_list:
-            page_info, a_val = page
+            page_info = page[0]
+            a_val = page[1:]
             items = []
             currentPage = 1
             if type(page_info) is dict and page_info.has_key('itemList') and page_info['itemList'] != []:
@@ -231,9 +232,13 @@ class Jsonpage():
                     for item_info in p.finditer(itemlist_info):
                         item = item_info.group(1)
                         items.append(item)
-                m = re.search(r'"currentPage":(\d+),', page_info, flags=re.S)
-                if m:
-                    currentPage = int(m.group(1))
+                    m = re.search(r'"currentPage":(\d+),', page_info, flags=re.S)
+                    if m:
+                        currentPage = int(m.group(1))
+                else:
+                    continue
+            else:
+                continue
             print '# item every page num:',len(items)
 
             i_position_start = 0
@@ -246,9 +251,9 @@ class Jsonpage():
             for i in range(0,len(items)):
                 item = items[i]
                 if a_val:
-                    item_val = (item, (a_val + ((i_position_start+i+1),)))
+                    item_val = (item,) + (a_val + ((i_position_start+i+1),))
                 else:
-                    item_val = (item, ((i_position_start+i+1),))
+                    item_val = (item, (i_position_start+i+1))
                 item_valList.append(item_val)
         print '# items parse json end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         return item_valList

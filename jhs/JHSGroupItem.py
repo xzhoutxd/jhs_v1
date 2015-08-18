@@ -8,10 +8,8 @@ import re
 import random
 import json
 import time
-from Jsonpage import Jsonpage
+from JHSQ import JHSQ
 from JHSGroupItemWorker import JHSGroupItemWorker
-from JHSGroupItemCatQ import JHSGroupItemCatQ
-from JHSGroupItemM import JHSGroupItemParserM
 from JHSGroupItemM import JHSGroupItemCrawlerM
 sys.path.append('../base')
 import Common as Common
@@ -21,24 +19,16 @@ from RetryCrawler import RetryCrawler
 class JHSGroupItem():
     '''A class of JHS group item channel'''
     def __init__(self, m_type):
-        # 抓取设置
-        self.crawler = RetryCrawler()
-
-        # 获取Json数据
-        self.jsonpage = Jsonpage()
- 
-        self.worker = JHSGroupItemWorker()
-        self.cat_queue = JHSGroupItemCatQ()
-
         # 分布式主机标志
         self.m_type = m_type
 
-        # 首页
-        self.home_url   = 'http://ju.taobao.com'
-        self.refers     = 'http://www.tmall.com'
+        # 抓取设置
+        self.crawler = RetryCrawler()
 
-        # 频道
-        self.today_url  = 'http://ju.taobao.com/tg/today_items.htm?type=0' # 商品团
+        # cat queue
+        self.cat_queue = JHSQ('groupitemcat', 'main')
+
+        self.worker = JHSGroupItemWorker()
 
         # 默认类别
         #self.category_list = [("http://ju.taobao.com/jusp/nvzhuangpindao/tp.htm#J_FixedNav","女装","1000")]
@@ -70,28 +60,6 @@ class JHSGroupItem():
         self.begin_date = Common.today_s()
         self.begin_hour = Common.nowhour_s()
 
-    def antPageOld(self):
-        try:
-            category_list = self.worker.scanCategories()
-            if not category_list or len(category_list) == 0:
-                category_list = self.category_list
-            ajax_url_list = []
-            # 获取每个类别的ajax json url
-            for category_val in category_list:
-                c_url,c_name,c_id = category_val
-                page = self.crawler.getData(c_url, self.today_url)
-                page_val = (page,c_name,c_id)
-                ajax_url_list = self.getAjaxurlList(page_val,c_url)
-
-            if len(ajax_url_list) > 0:
-                self.get_jsonitems(ajax_url_list)
-
-            # 删除Redis中结束商品
-            self.worker.scanEndItems()
-        except Exception as e:
-            print '# antpage error :',e
-            Common.traceback_log()
-
     def antPage(self):
         try:
             # 主机器需要配置redis队列
@@ -101,15 +69,17 @@ class JHSGroupItem():
                     category_list = self.category_list
                 if category_list and len(category_list) > 0:
                     # 清空category redis队列
-                    self.cat_queue.clearItemQ()
+                    self.cat_queue.clearQ()
                     # 保存category redis队列
-                    self.cat_queue.putItemlistQ(category_list)
+                    self.cat_queue.putlistQ(category_list)
                     print '# groupitem category queue end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 else:
                     print '# groupitem not find category...'
 
-            self.cat_queue.catQ(self.today_url)
-            items = self.cat_queue.items
+            obj = 'groupitemcat'
+            crawl_type = 'hour'
+            self.worker.process(obj, crawl_type, Config.ju_home_today)
+            items = self.worker.items
             print '# all parser items num:',len(items)
             # 查找新上商品
             self.get_newitems(items)
@@ -121,68 +91,6 @@ class JHSGroupItem():
             print '# antpage error :',e
             Common.traceback_log()
 
-    # get item json list in category page from ajax url
-    def get_jsonitems(self, ajax_url_list):
-        all_item_val = []
-        other_item_val = []
-        coming_item_val = []
-
-        item_list = []
-        # process ajax url list
-        item_json_index = 0
-        item_soldout_num = 0
-        for a_url in ajax_url_list:
-            # get json from ajax url
-            Result_list = self.jsonpage.get_json([a_url])
-            item_result_list = []
-            act_result_list = []
-            if Result_list and len(Result_list) > 0:
-                for result_val in Result_list:
-                    result = result_val[0]
-                    a_val = result_val[1:]
-                    if type(result) is dict and result.has_key('itemList'):
-                        item_result_list.append((result,a_val))
-                    elif type(result) is str:
-                        m = re.search(r'"itemList":\[(.+?}})\]', result, flags=re.S)
-                        if m:
-                            item_result_list.append((result,a_val))
-                        else:
-                            m = re.search(r'"brandList":\[(.+?}})\]', result, flags=re.S)
-                            if m:
-                                act_result_list.append((result,a_val))
-                            else:
-                                print '# not know the type of the result:',result
-                    elif type(result) is dict and result.has_key('brandList'):
-                        act_result_list.append((result,a_val))
-                    else:
-                        print '# not know the type of the result:',result
-                # parser item result
-                item_result_valList = []
-                if len(item_result_list) > 0:
-                    item_json_index += 1
-                    item_result_valList = self.jsonpage.parser_itemjson(item_result_list)
-                # the first item list is all online items
-                if item_json_index == 1:
-                    if len(item_result_list) > 0:
-                        all_item_val = item_result_valList
-                else:
-                    for item_val in item_result_valList:
-                        item_info, a_val = item_val
-                        item_list.append((item_info,) + a_val)
-        print '# today first page items num:',len(all_item_val)
-        print '# other subNav items num:',len(item_list)
-        if len(item_list) > 0:
-            self.process_items(item_list)
-
-    # parse item list and crawl new items
-    def process_items(self, item_list):
-        # 解析商品列表
-        itemparse_type = 'm'
-        # 附加信息
-        a_val = (self.begin_time,)
-        items = self.parseItems(item_list,itemparse_type,a_val)
-        self.get_newitems(items)
-
     # 查找新上商品,并抓取新上商品详情
     def get_newitems(self, items):
         result_items = []
@@ -193,7 +101,7 @@ class JHSGroupItem():
         new_item_list = self.worker.selectNewItems(result_items)
         print '# new items num:',len(new_item_list)
         # 抓取新上商品
-        itemcrawl_type = 'i'
+        itemcrawl_type = 'new'
         # 附加信息
         a_val = (self.begin_time,)
         items = self.crawlNewItems(new_item_list,itemcrawl_type,a_val)
@@ -205,25 +113,6 @@ class JHSGroupItem():
             item_juid = iteminfoSql[1]
             new_items.append({"item_juId":item_juid,"r_val":iteminfoSql})
         self.worker.putItemDB(new_items)
-
-    # 解析从接口中获取的商品数据
-    def parseItems(self, item_list, itemparse_type, a_val):
-        print '# parse Group Items start:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-        # 多线程 控制并发的线程数
-        max_th = Config.item_max_th
-        if len(item_list) > max_th:
-            m_itemsObj = JHSGroupItemParserM(itemparse_type, max_th, a_val)
-        else:
-            m_itemsObj = JHSGroupItemParserM(itemparse_type, len(item_list), a_val)
-        m_itemsObj.createthread()
-        m_itemsObj.putItems(item_list)
-        m_itemsObj.run()
-
-        _items = m_itemsObj.items
-        print '# parse item num:',len(_items)
-        print '# parse Group Items end:',time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        return _items
 
     # 抓取新上的商品详情
     def crawlNewItems(self, _new_items, itemcrawl_type, a_val):
@@ -245,7 +134,7 @@ class JHSGroupItem():
  
     # 商品团频道
     def categoryListTEMP(self):
-        page = self.crawler.getData(self.today_url, self.home_url)
+        page = self.crawler.getData(Config.ju_home_today, Config.ju_home)
         if not page or page == '': print '# not get today page'
         category_list = []
         m = re.search(r'<div class="J_CatLeft layout-left">.+?<table>(.+?)</table>.+?</div>',page,flags=re.S)

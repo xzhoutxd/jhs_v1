@@ -31,54 +31,54 @@ class JHSWorker():
     '''A class of jhs worker'''
     def __init__(self):
         # jhs brand type
-        self.worker_type   = Config.JHS_Brand
+        self.worker_type    = Config.JHS_Brand
         # DB
-        self.jhs_type      = Config.JHS_TYPE   # queue type
-        self.mysqlAccess   = MysqlAccess()     # mysql access
-        self.redisQueue    = RedisQueue()      # redis queue
-        self.redisAccess   = RedisAccess()     # redis db
-        self.mongofsAccess = MongofsAccess()   # mongodb fs access
+        self.jhs_type       = Config.JHS_TYPE   # queue type
+        self.mysqlAccess    = MysqlAccess()     # mysql access
+        self.redisQueue     = RedisQueue()      # redis queue
+        self.redisAccess    = RedisAccess()     # redis db
+        self.mongofsAccess  = MongofsAccess()   # mongodb fs access
 
         # 获取Json数据
-        self.jsonpage      = Jsonpage()
+        self.jsonpage       = Jsonpage()
 
         # 抓取设置
-        self.crawler = TBCrawler()
+        self.crawler        = TBCrawler()
 
         # 页面模板解析
-        self.brand_temp    = JHSBrandTEMP()
+        self.brand_temp     = JHSBrandTEMP()
 
         # message
-        self.message       = Message()
+        self.message        = Message()
 
         # 抓取时间设定
-        self.crawling_time = Common.now() # 当前爬取时间
-        self.begin_time = Common.now()
-        self.begin_date = Common.today_s()
-        self.begin_hour = Common.nowhour_s()
+        self.crawling_time  = Common.now() # 当前爬取时间
+        self.begin_time     = Common.now()
+        self.begin_date     = Common.today_s()
+        self.begin_hour     = Common.nowhour_s()
 
     def init_crawl(self, _obj, _crawl_type):
-        self._obj = _obj
-        self._crawl_type = _crawl_type
+        self._obj           = _obj
+        self._crawl_type    = _crawl_type
 
         # dial client
-        self.dial_client   = DialClient()
+        self.dial_client    = DialClient()
 
         # local ip
-        self._ip           = Common.local_ip()
+        self._ip            = Common.local_ip()
 
         # router tag
-        self._router_tag   = 'ikuai'
-        #self._router_tag  = 'tpent'
+        self._router_tag    = 'ikuai'
+        #self._router_tag   = 'tpent'
 
         # items
-        self.items = []
+        self.items          = []
 
         # giveup items
-        self.giveup_items  = []
+        self.giveup_items   = []
 
         # giveup msg val
-        self.giveup_val = None
+        self.giveup_val     = None
 
     # To dial router
     def dialRouter(self, _type, _obj):

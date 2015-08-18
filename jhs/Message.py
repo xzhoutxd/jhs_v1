@@ -10,7 +10,6 @@ class Message():
     def __init__(self):
         pass
 
-    ##### 品牌团 #####
     def jhsQueueMsg(self, _obj, _val):
         if _obj == "cat":
             return self.jhsCatQueueMsg(_val)
@@ -19,7 +18,15 @@ class Message():
         elif _obj == "item":
             return self.jhsItemQueueMsg(_val)
         else:
-            return None
+            return self.queueMsg(_val)
+
+    def queueMsg(self, _val):
+        msg = {}
+        msg["retry"]  = _val[0]
+        msg["obj"]    = _val[1]
+        msg["type"]   = _val[2]
+        msg["val"]    = _val[3:]
+        return msg
 
     """
     def jhsCatQueueMsg(self, _cat):
@@ -35,6 +42,7 @@ class Message():
         return cat
     """
 
+    ##### 品牌团 #####
     def jhsCatQueueMsg(self, _cat):
         cat = {}
         cat["retry"]  = _cat[0]
