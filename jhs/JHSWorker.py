@@ -226,11 +226,11 @@ class JHSWorker():
         if Result_list and len(Result_list) > 0:
             # parser act result
             act_valList = self.jsonpage.parser_brandjson(Result_list,_val)
-            if act_valList != []:
+            if act_valList and len(act_valList) > 0:
                 print '# get brand act num:',len(act_valList)
                 self.items.extend(act_valList)
             else:
-                print '# err: not get brandjson parse val list.'
+                print '# not get brandjson parse val list...'
 
     # get json ajax url
     def getAjaxurlList(self, page_val):

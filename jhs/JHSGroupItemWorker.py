@@ -210,7 +210,7 @@ class JHSGroupItemWorker():
 
             if Result_list and len(Result_list) > 0:
                 item_result_valList = self.jsonpage.parser_itemjson(Result_list)
-                if len(item_result_valList) > 0:
+                if item_result_valList and len(item_result_valList) > 0:
                     item_json_index += 1
                     # the first item list is all online items
                     if item_json_index == 1:
@@ -219,6 +219,8 @@ class JHSGroupItemWorker():
                             todayall_item_val = item_result_valList
                     else:
                         self.push_back_list(item_list, item_result_valList)
+                else:
+                    print '# not get itemjson parse val list...'
         if len(item_list) > 0:
             self.parseItems(item_list)
 
