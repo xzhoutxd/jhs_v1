@@ -1,9 +1,11 @@
 #-*- coding:utf-8 -*-
 #!/usr/bin/env python
+from sys import path
 
 import MySQLdb
 from DBUtils.PooledDB import PooledDB
-#import base.Environ as Environ
+path.append(r'../base')
+import Environ as Environ
 
 class MysqlPool:
     '''A class of connect pool to Mysql Database'''
@@ -51,13 +53,5 @@ class MysqlPool:
         except Exception as e:
             print '# MyDatabase executemany exception :', e, sql, args_list
 
-# mysql database pool
-mysql_config = {
-    # 919
-    'jhs' : {'host':'192.168.1.113', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
-    # pro 215
-    #'jhs' : {'host':'192.168.7.215', 'user':'jhs', 'passwd':'123456',  'db':'jhs'},
-}
-
-g_jhsDbPool = MysqlPool(mysql_config['jhs'])
+g_jhsDbPool = MysqlPool(Environ.mysql_config['jhs'])
 

@@ -27,11 +27,8 @@ redis_config = {
 
 ######################## Mysql配置  ######################
 # # 我的开发
+# 919
 mysql_config = {
-    'web'   : {'host':'192.168.1.8',   'user':'bduser', 'passwd':'bigdata!@#', 'db':'bigdata'},
-    'page'  : {'host':'192.168.1.112', 'user':'page',   'passwd':'123456', 'db':'page'},
-    'shopb' : {'host':'192.168.1.112', 'user':'shopb',  'passwd':'123456', 'db':'shopb'},
-    'vip'   : {'host':'192.168.1.112', 'user':'vip',    'passwd':'123456', 'db':'vip'},
     'jhs'   : {'host':'192.168.1.113', 'user':'jhs',    'passwd':'123456', 'db':'jhs'}
 }
 

@@ -39,16 +39,13 @@ redis_config_dev = {
 }
 
 ######################## Mysql配置  ######################
-# # 919测试
+# pro
 mysql_config = {
-    'web'   : {'host':'192.168.7.212', 'user':'bduser', 'passwd':'newword!@#', 'db':'bigdata'},
-    'shopb' : {'host':'192.168.7.213', 'user':'shopb',  'passwd':'123456', 'db':'shopb'},
-    'vip'   : {'host':'192.168.7.214', 'user':'vip',    'passwd':'123456', 'db':'vip'  },
     'jhs'   : {'host':'192.168.7.215', 'user':'jhs',    'passwd':'123456', 'db':'jhs'}
 }
 
 ######################## Mongodb配置  #####################
-# 919测试
+# pro
 mongodb_config = {'host':'192.168.7.211', 'port':9073}
 
 # mongodb gridfs collection名
