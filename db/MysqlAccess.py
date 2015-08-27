@@ -128,6 +128,7 @@ class MysqlAccess():
         except Exception, e:
             print '# select Jhs end item exception:', e
 
+    # 上个小时结束的商品
     def selectJhsItemEndLastOneHour(self, args):
         try:
             sql = 'select item_juid from nd_jhs_parser_item_info where start_time < %s and end_time > %s and end_time < %s'
@@ -153,6 +154,7 @@ class MysqlAccess():
         except Exception, e:
             print '# select Jhs end act exception:', e
 
+    # 上个小时结束的活动
     def selectJhsActEndLastOneHour(self, args):
         try:
             sql = 'select act_id from nd_jhs_parser_activity where start_time < %s and end_time > %s and end_time < %s and act_sign != 3'
@@ -308,6 +310,14 @@ class MysqlAccess():
             return self.jhs_db.select(sql, args)
         except Exception, e:
             print '# select Jhs itemgroup item end exception:', e
+
+    # 查找上个小时结束的商品
+    def selectJhsGroupItemEndLastOneHour(self, args):
+        try:
+            sql = 'select item_juid,item_id from nd_jhsitemgroup_parser_item_info where start_time < %s and end_time > %s and end_time < %s'
+            return self.jhs_db.select(sql, args)
+        except Exception, e:
+            print '# select Jhs itemgroup item lasthour end exception:', e
 
     # 查找没有结束的商品
     def selectJhsGroupItemNotEnd(self, args):

@@ -372,6 +372,17 @@ class JHSGroupItemWorker():
         print '# del item nums:',len(end_items)
         # 删除已经结束的商品
         self.delItem(end_items)
+
+    def scanEndItemsLasthour(self):
+        val = (Common.add_hours(self.crawling_time, -2),Common.add_hours(self.crawling_time, -2),Common.add_hours(self.crawling_time, -1))
+        _items = self.mysqlAccess.selectJhsGroupItemEndLastOneHour(val)
+        # 遍历商品
+        for _item in _items:
+            item_juid = _item[0]
+            end_items.append({"item_juId":str(item_juid)})
+        print '# del item nums for last hour end:',len(end_items)
+        # 删除已经结束的商品
+        self.delItem(end_items)
             
     def scanAliveItems(self):
         # 到结束时间后的一个小时

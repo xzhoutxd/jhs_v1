@@ -86,7 +86,8 @@ class JHSGroupItem():
 
             if self.m_type == 'm':
                 # 删除Redis中结束商品
-                self.worker.scanEndItems()
+                #self.worker.scanEndItems()
+                self.worker.scanEndItemsLasthour()
         except Exception as e:
             print '# antpage error :',e
             Common.traceback_log()
