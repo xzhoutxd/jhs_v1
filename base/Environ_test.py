@@ -47,9 +47,3 @@ def truncatePage(s):
     return s if len(s) < mongodb_maxsize else s[0:mongodb_maxsize]
 
 
-######################## 拨号服务器  #####################
-# 919
-dial_ip     = '192.168.1.112'
-dial_port   = 9075
-magic_num   = '%xiaoshu-dialing-9999%'
-
