@@ -376,6 +376,7 @@ class JHSGroupItemWorker():
     def scanEndItemsLasthour(self):
         val = (Common.add_hours(self.crawling_time, -2),Common.add_hours(self.crawling_time, -2),Common.add_hours(self.crawling_time, -1))
         _items = self.mysqlAccess.selectJhsGroupItemEndLastOneHour(val)
+        end_items = []
         # 遍历商品
         for _item in _items:
             item_juid = _item[0]
